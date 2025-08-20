@@ -1,16 +1,21 @@
+import ResumeCard from "@/components/ResumeCard";
+import { resumes } from "@/constants";
+
 export default function Home() {
   return (
-    <main>
-      <section className="main-section">
-        <div className="page-heading">
-          <h1>Welcome to AutoCv</h1>
-          <h2>
-            Track and manage your CV Applications with our Smart CV
-            Builder
-          </h2>
-        </div>
-      </section>
+    <section className="main-section">
+      <div className="page-heading py-16">
+        <h1>Welcome to AutoCv</h1>
+        <h2>Track and manage your CV Applications with our Smart CV Builder</h2>
+      </div>
       {/* User Generated Resumes */}
-    </main>
+      {resumes.length > 0 && (
+        <div className="resumes-section">
+          {resumes.map((resume) => (
+            <ResumeCard key={resume.id} resume={resume} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
