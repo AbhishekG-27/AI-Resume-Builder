@@ -15,7 +15,7 @@ export const getCurrentSession = async () => {
     const user = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.usersCollectionId,
-      [Query.equal("accountId", [result.$id])]
+      [Query.equal("id", [result.$id])]
     );
     if (user.total <= 0) return null;
     return parseStringify(user.documents[0]);
@@ -115,7 +115,7 @@ export const createAccount = async ({
         id: accountId,
         name: fullName,
         email: email,
-        noOfCvCreated: 0,
+        resume_id: null,
       }
     );
     return parseStringify({
@@ -126,25 +126,46 @@ export const createAccount = async ({
   }
 };
 
-export const updateUserCredits = async (
-  documentId: string,
-  newCreditsAmount: number
-) => {
-  try {
-    const { databases } = await createAdminClient();
+export const UploadUserResume = async (file: File, user_id: string) => {
+  const session = await createSessionClient();
+  if (!session) return;
 
-    const updatedUser = await databases.updateDocument(
+  const { storage, databases } = session;
+
+  try {
+    const uploadResult = await storage.createFile(
+      appwriteConfig.bucketId,
+      ID.unique(),
+      file
+    );
+    const resume_id = uploadResult.$id;
+
+    // 2. Fetch the current user's document
+    const userDoc = await databases.getDocument(
       appwriteConfig.databaseId,
       appwriteConfig.usersCollectionId,
-      documentId,
+      user_id
+    );
+
+    // 3. Update the array of resume IDs
+    // Get the existing array, or initialize a new one if it doesn't exist
+    const existingResumeIds = userDoc.resume_id || [];
+    const updatedResumeIds = [...existingResumeIds, resume_id];
+
+    // 4. Save the entire updated array back to the user's document
+    const updatedDocument = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      user_id,
       {
-        credits: newCreditsAmount,
+        resume_id: updatedResumeIds, // Overwrite with the new, complete array
       }
     );
 
-    return parseStringify(updatedUser);
+    return { success: true, resume_id: resume_id, document: updatedDocument };
   } catch (error) {
-    console.error("Error updating user credits:", error);
-    throw new Error("Failed to update user credits");
+    console.error("Error in UploadUserResume:", error);
+    // Return a more structured error
+    return null;
   }
 };
