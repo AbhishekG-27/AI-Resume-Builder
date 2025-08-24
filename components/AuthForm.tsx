@@ -69,6 +69,7 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
         const user = await getAccount(email);
         if (user.id) {
           setUserId(user.id);
+          setEmail(email);
         } else {
           // Handle case where user does not exist
           console.error("User does not exist");

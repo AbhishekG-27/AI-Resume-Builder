@@ -83,7 +83,7 @@ const OtpModal = ({
               Verify Your Identity
             </AlertDialogTitle>
             <AlertDialogDescription className="text-base leading-relaxed text-gray-600">
-              We've sent a 6-digit verification code to
+              We&apos;ve sent a 6-digit verification code to
               <br />
               <span className="font-semibold text-gray-900">{email}</span>
             </AlertDialogDescription>
@@ -151,7 +151,7 @@ const OtpModal = ({
 
             {/* Resend Section */}
             <div className="flex items-center justify-center space-x-1 text-sm">
-              <span className="text-gray-500">Didn't receive the code?</span>
+              <span className="text-gray-500">Didn&apos;t receive the code?</span>
               <Button
                 type="button"
                 variant="link"
