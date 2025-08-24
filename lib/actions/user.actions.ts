@@ -3,7 +3,7 @@
 import { ID, Query } from "node-appwrite";
 import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
-import { parseStringify } from "../utils";
+import { extractTextFromPDF, parseStringify } from "../utils";
 import { cookies } from "next/headers";
 import OpenAI from "openai";
 
@@ -163,13 +163,10 @@ export const UploadUserResume = async (file: File, user_id: string) => {
       }
     );
 
-    const downloadUrl = await getResumeDownloadUrl(resume_id);
-
     return {
       success: true,
       resume_id: resume_id,
       document: updatedDocument,
-      resumeUrl: downloadUrl,
     };
   } catch (error) {
     console.error("Error in UploadUserResume:", error);
@@ -178,25 +175,8 @@ export const UploadUserResume = async (file: File, user_id: string) => {
   }
 };
 
-export async function getResumeDownloadUrl(resumeId: string) {
-  const session = await createSessionClient();
-  if (!session) return;
-  try {
-    const { storage } = session;
-    const result = await storage.getFileDownload(
-      appwriteConfig.bucketId, // Your bucket ID
-      resumeId // The ID of the file
-    );
-
-    console.log("Download URL:", result);
-    return result;
-  } catch (error) {
-    console.error("Error getting file download link:", error);
-    return null;
-  }
-}
-
-export async function analyzePdfFromText(resume: string) {
+export async function analyzePdfFromText(resumeFile: File) {
+  const resumeText = await extractTextFromPDF(resumeFile); // Extract text from PDF
   const openai = new OpenAI({
     apiKey: "YOUR_OPENAI_API_KEY",
   });
@@ -208,12 +188,15 @@ export async function analyzePdfFromText(resume: string) {
         content: [
           {
             type: "text",
-            text: `Analyze the attached resume and provide a summary of the key points. ${resume}`,
+            text: `Analyze the attached resume and provide a summary of the key points. ${resumeText}`,
           },
         ],
       },
     ],
   });
 
-  console.log(response.choices[0].message.content);
+  if (!response) {
+    return null;
+  }
+  return response.choices[0].message.content;
 }

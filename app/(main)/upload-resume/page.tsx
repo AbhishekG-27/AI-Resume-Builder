@@ -20,7 +20,6 @@ const UploadResume = () => {
     if (!form) {
       return;
     }
-    setStatusText("Analyzing your resume...");
 
     const formData = new FormData(form);
 
@@ -44,8 +43,8 @@ const UploadResume = () => {
       if (!response) return;
 
       // 2. Call backend API to analyze resume
-      const { resumeUrl, resume_id } = response;
-      // 3. Display results or feedback to user
+      const { resume_id } = response;
+      // 3. Navigate to the results page using the resume_id
     } catch (error) {
       console.error("Error during resume analysis:", error);
       setStatusText("An error occurred. Please try again.");
