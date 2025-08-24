@@ -5,6 +5,7 @@ import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
 import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
+import OpenAI from "openai";
 
 export const getCurrentSession = async () => {
   const session = await createSessionClient();
@@ -162,10 +163,57 @@ export const UploadUserResume = async (file: File, user_id: string) => {
       }
     );
 
-    return { success: true, resume_id: resume_id, document: updatedDocument };
+    const downloadUrl = await getResumeDownloadUrl(resume_id);
+
+    return {
+      success: true,
+      resume_id: resume_id,
+      document: updatedDocument,
+      resumeUrl: downloadUrl,
+    };
   } catch (error) {
     console.error("Error in UploadUserResume:", error);
     // Return a more structured error
     return null;
   }
 };
+
+export async function getResumeDownloadUrl(resumeId: string) {
+  const session = await createSessionClient();
+  if (!session) return;
+  try {
+    const { storage } = session;
+    const result = await storage.getFileDownload(
+      appwriteConfig.bucketId, // Your bucket ID
+      resumeId // The ID of the file
+    );
+
+    console.log("Download URL:", result);
+    return result;
+  } catch (error) {
+    console.error("Error getting file download link:", error);
+    return null;
+  }
+}
+
+export async function analyzePdfFromText(resume: string) {
+  const openai = new OpenAI({
+    apiKey: "YOUR_OPENAI_API_KEY",
+  });
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: `Analyze the attached resume and provide a summary of the key points. ${resume}`,
+          },
+        ],
+      },
+    ],
+  });
+
+  console.log(response.choices[0].message.content);
+}

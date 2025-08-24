@@ -16,7 +16,7 @@ type AuthTypes = "sign-in" | "sign-up";
 const formSchema = (authType: AuthTypes) => {
   return z.object({
     // Use the standard z.string().email() for validation
-    email: z.email("Please enter a valid email address"),
+    email: z.string().email("Please enter a valid email address"),
     fullName:
       authType === "sign-up"
         ? z.string().min(2, "Full name is required")

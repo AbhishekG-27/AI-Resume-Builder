@@ -44,6 +44,7 @@ const UploadResume = () => {
       if (!response) return;
 
       // 2. Call backend API to analyze resume
+      const { resumeUrl, resume_id } = response;
       // 3. Display results or feedback to user
     } catch (error) {
       console.error("Error during resume analysis:", error);
