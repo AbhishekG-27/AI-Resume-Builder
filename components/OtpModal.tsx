@@ -23,6 +23,7 @@ import {
   sendEmailAuthenticationCode,
   verifySecret,
 } from "@/lib/actions/user.actions";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 const OtpModal = ({
   accountId,
@@ -36,6 +37,8 @@ const OtpModal = ({
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const { refreshUser } = useAuth();
+
   const handleClose = () => {
     setIsOpen(false);
   };
@@ -46,7 +49,10 @@ const OtpModal = ({
 
     try {
       const sessionId = await verifySecret({ accountId, password });
-      if (sessionId) router.push("/");
+      if (sessionId) {
+        refreshUser();
+        router.push("/");
+      }
     } catch (error) {
       console.error("Failed to verify OTP", error);
     } finally {
@@ -151,7 +157,9 @@ const OtpModal = ({
 
             {/* Resend Section */}
             <div className="flex items-center justify-center space-x-1 text-sm">
-              <span className="text-gray-500">Didn&apos;t receive the code?</span>
+              <span className="text-gray-500">
+                Didn&apos;t receive the code?
+              </span>
               <Button
                 type="button"
                 variant="link"

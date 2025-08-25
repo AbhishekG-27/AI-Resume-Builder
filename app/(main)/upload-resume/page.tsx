@@ -4,11 +4,14 @@ import { FileText } from "lucide-react";
 import FileUploader from "@/components/FileUploader";
 import {
   analyzePdfFromText,
+  AnalyzePdfFromUrl,
+  fetchFileFromAppwrite,
   UploadResumeimage,
   UploadUserResume,
 } from "@/lib/actions/user.actions";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { TextItem, TextMarkedContent } from "pdfjs-dist/types/src/display/api";
+import { extractStructuredPdfText } from "@/lib/pdf2text";
 
 interface PdfConversionResult {
   imageUrl: string;
@@ -175,6 +178,7 @@ const UploadResume = () => {
       const response = await UploadUserResume(selectedFile, user_id);
       await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
+      const { resume_id } = response;
 
       // 2. Convert pdf to image
       setStatusText("Processing your resume...");
@@ -191,15 +195,29 @@ const UploadResume = () => {
       if (!imageUploadResponse)
         return setStatusText("Failed to upload resume image.");
 
-      // // 4. Call backend API to analyze resume
-      // setStatusText("Analyzing your resume...");
-      // const resumetext = await extractTextFromPDF(selectedFile);
-      // const { resume_id } = response;
+      // Extract the url of the uploaded file.
+      setStatusText("Fetching resume data...");
+      const resumeUrl = await fetchFileFromAppwrite(resume_id);
+      if (!resumeUrl) return setStatusText("Failed to fetch resume data.");
+      console.log("resumeUrl", resumeUrl);
+
+      // 4. Call backend API to analyze resume
+      setStatusText("Analyzing your resume...");
+      // const resumetext = await extractStructuredPdfText(selectedFile, pdfjsLib);
+      // if (!resumetext) {
+      //   setStatusText("Failed to extract text from resume.");
+      //   return;
+      // }
       // const analysisResponse = await analyzePdfFromText({
       //   resumeText: resumetext,
       //   jobTitle,
       //   jobDescription,
       // });
+      // const analysisResponse = await AnalyzePdfFromUrl(
+      //   resumeUrl,
+      //   jobTitle,
+      //   jobDescription
+      // );
       // if (!analysisResponse) {
       //   setStatusText("Failed to analyze resume. Please try again.");
       //   return;
