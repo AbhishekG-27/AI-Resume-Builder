@@ -19,7 +19,7 @@ const FileUploader = ({
       if (rejectedFiles.length > 0) {
         const rejection = rejectedFiles[0];
         if (rejection.errors[0]?.code === "file-invalid-type") {
-          setError("Please upload only PDF, DOC, or DOCX files.");
+          setError("Please upload only PDF files.");
         } else if (rejection.errors[0]?.code === "file-too-large") {
           setError("File size must be less than 10MB.");
         } else {
@@ -40,9 +40,6 @@ const FileUploader = ({
       onDrop,
       accept: {
         "application/pdf": [".pdf"],
-        "application/msword": [".doc"],
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-          [".docx"],
       },
       maxFiles: 1,
       maxSize: 10 * 1024 * 1024, // 10MB

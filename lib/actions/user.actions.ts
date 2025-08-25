@@ -3,9 +3,10 @@
 import { ID, Query } from "node-appwrite";
 import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
-import { extractTextFromPDF, parseStringify } from "../utils";
+import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
 import OpenAI from "openai";
+import { prepareInstructions } from "@/constants";
 
 export const getCurrentSession = async () => {
   const session = await createSessionClient();
@@ -117,6 +118,7 @@ export const createAccount = async ({
         name: fullName,
         email: email,
         resume_id: null,
+        resume_img: null,
       }
     );
     return parseStringify({
@@ -129,7 +131,7 @@ export const createAccount = async ({
 
 export const UploadUserResume = async (file: File, user_id: string) => {
   const session = await createSessionClient();
-  if (!session) return;
+  if (!session) return null;
 
   const { storage, databases } = session;
 
@@ -175,8 +177,63 @@ export const UploadUserResume = async (file: File, user_id: string) => {
   }
 };
 
-export async function analyzePdfFromText(resumeFile: File) {
-  const resumeText = await extractTextFromPDF(resumeFile); // Extract text from PDF
+export const UploadResumeimage = async (file: File, user_id: string) => {
+  const session = await createSessionClient();
+  if (!session) return null;
+
+  const { storage, databases } = session;
+
+  try {
+    const uploadResult = await storage.createFile(
+      appwriteConfig.bucketId,
+      ID.unique(),
+      file
+    );
+    const resume_img_id = uploadResult.$id;
+
+    // 2. Fetch the current user's document
+    const userDoc = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      user_id
+    );
+
+    // 3. Update the array of resume image IDs
+    // Get the existing array, or initialize a new one if it doesn't exist
+    const existingResumeImgIds = userDoc.resume_img || [];
+    const updatedResumeImgIds = [...existingResumeImgIds, resume_img_id];
+
+    // 4. Save the entire updated array back to the user's document
+    const updatedDocument = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      user_id,
+      {
+        resume_img: updatedResumeImgIds, // Overwrite with the new, complete array
+      }
+    );
+
+    return {
+      success: true,
+      resume_img_id: resume_img_id,
+      document: updatedDocument,
+    };
+  } catch (error) {
+    console.error("Error in UploadResumeImage:", error);
+    // Return a more structured error
+    return null;
+  }
+};
+
+export async function analyzePdfFromText({
+  resumeText,
+  jobTitle,
+  jobDescription,
+}: {
+  resumeText: string;
+  jobTitle: string;
+  jobDescription: string;
+}) {
   const openai = new OpenAI({
     apiKey: "YOUR_OPENAI_API_KEY",
   });
@@ -188,7 +245,10 @@ export async function analyzePdfFromText(resumeFile: File) {
         content: [
           {
             type: "text",
-            text: `Analyze the attached resume and provide a summary of the key points. ${resumeText}`,
+            text: `${prepareInstructions({
+              jobTitle,
+              jobDescription,
+            })}\n Resume: ${resumeText}`,
           },
         ],
       },

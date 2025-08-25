@@ -1,20 +1,155 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import FileUploader from "@/components/FileUploader";
 import {
-  getCurrentSession,
+  analyzePdfFromText,
+  UploadResumeimage,
   UploadUserResume,
 } from "@/lib/actions/user.actions";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { TextItem, TextMarkedContent } from "pdfjs-dist/types/src/display/api";
+
+interface PdfConversionResult {
+  imageUrl: string;
+  file: File | null;
+  error?: string;
+}
 
 const UploadResume = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [pdfjsLib, setPdfjsLib] = useState<any>(null);
+  const [isPdfjsLoading, setIsPdfjsLoading] = useState(false);
+
+  const { user, refreshUser } = useAuth();
+
+  // Load PDF.js on component mount
+  useEffect(() => {
+    const loadPdfJs = async () => {
+      if (pdfjsLib || isPdfjsLoading) return;
+
+      setIsPdfjsLoading(true);
+      try {
+        // @ts-expect-error - pdfjs-dist/build/pdf.mjs is not a module
+        const lib = await import("pdfjs-dist/build/pdf.mjs");
+
+        // Use CDN for worker
+        lib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.worker.min.mjs";
+
+        setPdfjsLib(lib);
+      } catch (error) {
+        console.error("Failed to load PDF.js:", error);
+      } finally {
+        setIsPdfjsLoading(false);
+      }
+    };
+
+    loadPdfJs();
+  }, [pdfjsLib, isPdfjsLoading]);
+
+  const extractTextFromPDF = async (file: File) => {
+    if (!pdfjsLib) {
+      throw new Error("PDF.js not loaded");
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer })
+      .promise;
+
+    let fullText = "";
+    for (let i = 1; i <= pdfDocument.numPages; i++) {
+      const page = await pdfDocument.getPage(i);
+      const content = await page.getTextContent();
+
+      const strings = content.items
+        .map((item: TextItem | TextMarkedContent) => {
+          if ("str" in item) {
+            return item.str;
+          }
+          return "";
+        })
+        .filter((text: string) => text !== "");
+      fullText += strings.join(" ") + "\n\n";
+    }
+    return fullText;
+  };
+
+  const convertPdfToImage = async (
+    file: File
+  ): Promise<PdfConversionResult> => {
+    if (!pdfjsLib) {
+      return {
+        imageUrl: "",
+        file: null,
+        error: "PDF.js not loaded",
+      };
+    }
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const page = await pdf.getPage(1);
+
+      const viewport = page.getViewport({ scale: 4 });
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      if (context) {
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+      }
+
+      await page.render({ canvasContext: context!, viewport }).promise;
+
+      return new Promise((resolve) => {
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const originalName = file.name.replace(/\.pdf$/i, "");
+              const imageFile = new File([blob], `${originalName}.png`, {
+                type: "image/png",
+              });
+
+              resolve({
+                imageUrl: URL.createObjectURL(blob),
+                file: imageFile,
+              });
+            } else {
+              resolve({
+                imageUrl: "",
+                file: null,
+                error: "Failed to create image blob",
+              });
+            }
+          },
+          "image/png",
+          1.0
+        );
+      });
+    } catch (err) {
+      console.error("Error converting PDF to image:", err);
+      return {
+        imageUrl: "",
+        file: null,
+        error: `Failed to convert PDF: ${err}`,
+      };
+    }
+  };
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsProcessing(true);
+
+    if (!user) {
+      console.error("User not authenticated");
+      return;
+    }
 
     const form = event.currentTarget.closest("form");
     if (!form) {
@@ -34,17 +169,42 @@ const UploadResume = () => {
     const jobDescription = formData.get("job-description") as string;
 
     try {
-      setStatusText("Uploading your resume...");
       // 1. Upload file to appwrite bucket
-      const current_user = await getCurrentSession();
-      if (!current_user) return;
-      const user_id = current_user.$id;
+      setStatusText("Uploading your resume...");
+      const user_id = user.id;
       const response = await UploadUserResume(selectedFile, user_id);
-      if (!response) return;
+      await refreshUser();
+      if (!response) return setStatusText("Failed to upload resume.");
 
-      // 2. Call backend API to analyze resume
-      const { resume_id } = response;
-      // 3. Navigate to the results page using the resume_id
+      // 2. Convert pdf to image
+      setStatusText("Processing your resume...");
+      const imageFile = await convertPdfToImage(selectedFile);
+      if (!imageFile.file)
+        return setStatusText("Failed to convert PDF to image.");
+
+      // 3. upload the image to appwrite bucket
+      setStatusText("Uploading resume image...");
+      const imageUploadResponse = await UploadResumeimage(
+        imageFile.file,
+        user_id
+      );
+      if (!imageUploadResponse)
+        return setStatusText("Failed to upload resume image.");
+
+      // // 4. Call backend API to analyze resume
+      // setStatusText("Analyzing your resume...");
+      // const resumetext = await extractTextFromPDF(selectedFile);
+      // const { resume_id } = response;
+      // const analysisResponse = await analyzePdfFromText({
+      //   resumeText: resumetext,
+      //   jobTitle,
+      //   jobDescription,
+      // });
+      // if (!analysisResponse) {
+      //   setStatusText("Failed to analyze resume. Please try again.");
+      //   return;
+      // }
+      // 5. Navigate to the results page using the resume_id
     } catch (error) {
       console.error("Error during resume analysis:", error);
       setStatusText("An error occurred. Please try again.");

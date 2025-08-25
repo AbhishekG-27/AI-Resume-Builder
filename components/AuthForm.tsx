@@ -10,6 +10,8 @@ import { z } from "zod";
 import { createAccount, getAccount } from "@/lib/actions/user.actions";
 import OtpModal from "./OtpModal";
 import Image from "next/image";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 type AuthTypes = "sign-in" | "sign-up";
 
@@ -28,6 +30,9 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState("");
+
+  const { refreshUser, user } = useAuth();
+  const router = useRouter();
 
   const authFormSchema = formSchema(type);
 
@@ -50,6 +55,11 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
   const onSubmit = async (values: z.infer<typeof authFormSchema>) => {
     setIsLoading(true);
     try {
+      if (user) {
+        console.log("User already logged in");
+        return router.push("/");
+      }
+
       if (type === "sign-up") {
         const { fullName, email } = values;
         const user = await createAccount({
@@ -60,6 +70,7 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
           // User already exists, handle redirection
           console.error(user.message);
         } else {
+          await refreshUser();
           setUserId(user.accountId);
           setEmail(email);
         }
@@ -68,6 +79,7 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
         const { email } = values;
         const user = await getAccount(email);
         if (user.id) {
+          await refreshUser();
           setUserId(user.id);
           setEmail(email);
         } else {
