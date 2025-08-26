@@ -225,22 +225,43 @@ export const UploadResumeimage = async (file: File, user_id: string) => {
   }
 };
 
-export async function fetchFileFromAppwrite(resumeId: string) {
-  const session = await createSessionClient();
-  if (!session) return null;
+export async function AnalyzePdfFromFile(
+  resume: string,
+  jobTitle: string,
+  jobDescription: string
+) {
+  const openai = new OpenAI({
+    apiKey: process.env.NEXT_OPENAI_API_KEY,
+  });
 
-  const { storage } = session;
+  const response = await openai.responses.create({
+    model: "gpt-5",
+    input: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_file",
+            filename: "resume.pdf",
+            file_data: resume,
+          },
+          {
+            type: "input_text",
+            text: prepareInstructions({
+              jobTitle,
+              jobDescription,
+            }),
+          },
+        ],
+      },
+    ],
+  });
 
-  try {
-    const file = await storage.getFileDownload(
-      appwriteConfig.bucketId,
-      resumeId
-    );
-    return file.toString();
-  } catch (error) {
-    console.error("Error fetching file from Appwrite:", error);
+  if (!response) {
     return null;
   }
+
+  return response.output_text;
 }
 
 export async function AnalyzePdfFromUrl(
@@ -280,47 +301,6 @@ export async function AnalyzePdfFromUrl(
     return response.output_text;
   } catch (error) {
     console.error("Error in analyzePdfFromUrl:", error);
-    return null;
-  }
-}
-
-export async function analyzePdfFromText({
-  resumeText,
-  jobTitle,
-  jobDescription,
-}: {
-  resumeText: string;
-  jobTitle: string;
-  jobDescription: string;
-}) {
-  const openai = new OpenAI({
-    apiKey: process.env.NEXT_OPENAI_API_KEY,
-  });
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `${prepareInstructions({
-                jobTitle,
-                jobDescription,
-              })}\n Resume: ${resumeText}`,
-            },
-          ],
-        },
-      ],
-    });
-
-    if (!response) {
-      return null;
-    }
-    return response.choices[0].message.content;
-  } catch (error) {
-    console.error("Error in analyzePdfFromText:", error);
     return null;
   }
 }

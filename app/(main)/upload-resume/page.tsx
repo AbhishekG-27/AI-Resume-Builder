@@ -3,15 +3,11 @@ import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import FileUploader from "@/components/FileUploader";
 import {
-  analyzePdfFromText,
-  AnalyzePdfFromUrl,
-  fetchFileFromAppwrite,
+  AnalyzePdfFromFile,
   UploadResumeimage,
   UploadUserResume,
 } from "@/lib/actions/user.actions";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { TextItem, TextMarkedContent } from "pdfjs-dist/types/src/display/api";
-import { extractStructuredPdfText } from "@/lib/pdf2text";
 
 interface PdfConversionResult {
   imageUrl: string;
@@ -53,31 +49,13 @@ const UploadResume = () => {
     loadPdfJs();
   }, [pdfjsLib, isPdfjsLoading]);
 
-  const extractTextFromPDF = async (file: File) => {
-    if (!pdfjsLib) {
-      throw new Error("PDF.js not loaded");
-    }
-
-    const arrayBuffer = await file.arrayBuffer();
-    const pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer })
-      .promise;
-
-    let fullText = "";
-    for (let i = 1; i <= pdfDocument.numPages; i++) {
-      const page = await pdfDocument.getPage(i);
-      const content = await page.getTextContent();
-
-      const strings = content.items
-        .map((item: TextItem | TextMarkedContent) => {
-          if ("str" in item) {
-            return item.str;
-          }
-          return "";
-        })
-        .filter((text: string) => text !== "");
-      fullText += strings.join(" ") + "\n\n";
-    }
-    return fullText;
+  const ConvertFileToBase64 = (file: File) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+    });
   };
 
   const convertPdfToImage = async (
@@ -195,33 +173,21 @@ const UploadResume = () => {
       if (!imageUploadResponse)
         return setStatusText("Failed to upload resume image.");
 
-      // Extract the url of the uploaded file.
-      setStatusText("Fetching resume data...");
-      const resumeUrl = await fetchFileFromAppwrite(resume_id);
-      if (!resumeUrl) return setStatusText("Failed to fetch resume data.");
-      console.log("resumeUrl", resumeUrl);
+      const pdfData = await ConvertFileToBase64(selectedFile);
+      if (!pdfData) return setStatusText("Failed to convert PDF to base64.");
 
       // 4. Call backend API to analyze resume
       setStatusText("Analyzing your resume...");
-      // const resumetext = await extractStructuredPdfText(selectedFile, pdfjsLib);
-      // if (!resumetext) {
-      //   setStatusText("Failed to extract text from resume.");
-      //   return;
-      // }
-      // const analysisResponse = await analyzePdfFromText({
-      //   resumeText: resumetext,
-      //   jobTitle,
-      //   jobDescription,
-      // });
-      // const analysisResponse = await AnalyzePdfFromUrl(
-      //   resumeUrl,
-      //   jobTitle,
-      //   jobDescription
-      // );
-      // if (!analysisResponse) {
-      //   setStatusText("Failed to analyze resume. Please try again.");
-      //   return;
-      // }
+      const analysisResponse = await AnalyzePdfFromFile(
+        pdfData.toString(),
+        jobTitle,
+        jobDescription
+      );
+      console.log(analysisResponse);
+      if (!analysisResponse) {
+        setStatusText("Failed to analyze resume. Please try again.");
+        return;
+      }
       // 5. Navigate to the results page using the resume_id
     } catch (error) {
       console.error("Error during resume analysis:", error);
