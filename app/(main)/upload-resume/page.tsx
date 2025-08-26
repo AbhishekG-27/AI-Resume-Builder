@@ -8,6 +8,7 @@ import {
   UploadUserResume,
 } from "@/lib/actions/user.actions";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface PdfConversionResult {
   imageUrl: string;
@@ -22,6 +23,7 @@ const UploadResume = () => {
   const [pdfjsLib, setPdfjsLib] = useState<any>(null);
   const [isPdfjsLoading, setIsPdfjsLoading] = useState(false);
 
+  const router = useRouter();
   const { user, refreshUser } = useAuth();
 
   // Load PDF.js on component mount
@@ -188,7 +190,12 @@ const UploadResume = () => {
         setStatusText("Failed to analyze resume. Please try again.");
         return;
       }
-      // 5. Navigate to the results page using the resume_id
+
+      // 5. Upload the analysis results to the user
+
+      // 6. Navigate to the results page using the resume_id
+      setStatusText("Analysis complete! Redirecting...");
+      router.push(`/resume/${resume_id}`);
     } catch (error) {
       console.error("Error during resume analysis:", error);
       setStatusText("An error occurred. Please try again.");
