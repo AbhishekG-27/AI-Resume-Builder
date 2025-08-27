@@ -304,3 +304,51 @@ export async function AnalyzePdfFromUrl(
     return null;
   }
 }
+
+export const UpdateResumeAnalysis = async (user_id: string, analysis: string) => {
+  const session = await createSessionClient();
+  if (!session) return null;
+
+  const { databases } = session;
+
+  try {
+    // Create a document in analysis collection
+    const analysisDocument = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.analysisCollectionId,
+      ID.unique(),
+      {
+        analysis_data: analysis,
+      }
+    );
+
+    // Get the current analysis for the user
+    const userDoc = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      user_id
+    );
+
+    // Link the created analysis document to the user
+    const updatedDocument = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      user_id,
+      {
+        resume_analysis: [
+          ...(userDoc.resume_analysis || []),
+          analysisDocument.$id,
+        ],
+      }
+    );
+
+    return {
+      success: true,
+      document: updatedDocument,
+    };
+  } catch (error) {
+    console.error("Error in UpdateResumeAnalysis:", error);
+    // Return a more structured error
+    return null;
+  }
+};

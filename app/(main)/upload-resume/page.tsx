@@ -4,6 +4,7 @@ import { FileText } from "lucide-react";
 import FileUploader from "@/components/FileUploader";
 import {
   AnalyzePdfFromFile,
+  UpdateResumeAnalysis,
   UploadResumeimage,
   UploadUserResume,
 } from "@/lib/actions/user.actions";
@@ -185,13 +186,20 @@ const UploadResume = () => {
         jobTitle,
         jobDescription
       );
-      console.log(analysisResponse);
       if (!analysisResponse) {
         setStatusText("Failed to analyze resume. Please try again.");
         return;
       }
 
       // 5. Upload the analysis results to the user
+      const updateResponse = await UpdateResumeAnalysis(
+        user_id,
+        analysisResponse
+      );
+      if (!updateResponse) {
+        setStatusText("Failed to update resume analysis.");
+        return;
+      }
 
       // 6. Navigate to the results page using the resume_id
       setStatusText("Analysis complete! Redirecting...");
