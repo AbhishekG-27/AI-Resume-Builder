@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { FileText } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { FileText, Eye, X } from "lucide-react";
 import FileUploader from "@/components/FileUploader";
 import {
   AnalyzePdfFromFile,
@@ -9,7 +9,8 @@ import {
   UploadUserResume,
 } from "@/lib/actions/user.actions";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import ShowResumeAnalysis from "@/components/ShowResumeAnalysis";
+// import { useRouter } from "next/navigation";
 
 interface PdfConversionResult {
   imageUrl: string;
@@ -23,9 +24,25 @@ const UploadResume = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pdfjsLib, setPdfjsLib] = useState<any>(null);
   const [isPdfjsLoading, setIsPdfjsLoading] = useState(false);
+  const [analysisData, setAnalysisData] = useState<string>("");
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const feedbackSectionRef = useRef<HTMLDivElement>(null);
 
-  const router = useRouter();
+  // const router = useRouter();
   const { user, refreshUser } = useAuth();
+
+  // Auto-scroll when feedback data is set
+  useEffect(() => {
+    if (analysisData && feedbackSectionRef.current) {
+      const timer = setTimeout(() => {
+        feedbackSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [analysisData]);
 
   // Load PDF.js on component mount
   useEffect(() => {
@@ -51,6 +68,40 @@ const UploadResume = () => {
 
     loadPdfJs();
   }, [pdfjsLib, isPdfjsLoading]);
+
+  // Create preview URL when file is selected
+  useEffect(() => {
+    if (selectedFile && selectedFile.type === "application/pdf") {
+      const url = URL.createObjectURL(selectedFile);
+      setPdfPreviewUrl(url);
+
+      // Clean up previous URL
+      return () => {
+        if (pdfPreviewUrl) {
+          URL.revokeObjectURL(pdfPreviewUrl);
+        }
+      };
+    } else {
+      setPdfPreviewUrl(null);
+    }
+  }, [selectedFile]);
+
+  // Clean up URL on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfPreviewUrl) {
+        URL.revokeObjectURL(pdfPreviewUrl);
+      }
+    };
+  }, [pdfPreviewUrl]);
+
+  const handleRemovePdf = () => {
+    if (pdfPreviewUrl) {
+      URL.revokeObjectURL(pdfPreviewUrl);
+    }
+    setPdfPreviewUrl(null);
+    setSelectedFile(null);
+  };
 
   const ConvertFileToBase64 = (file: File) => {
     return new Promise((resolve, reject) => {
@@ -159,7 +210,7 @@ const UploadResume = () => {
       const response = await UploadUserResume(selectedFile, user_id);
       await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
-      const { resume_id, documentId } = response;
+      const { documentId } = response;
 
       // 2. Convert pdf to image
       setStatusText("Processing your resume...");
@@ -200,16 +251,14 @@ const UploadResume = () => {
         setStatusText("Failed to update resume analysis.");
         return;
       }
-
-      // 6. Navigate to the results page using the resume_id
-      setStatusText("Analysis complete! Redirecting...");
-      router.push(`/resume/${resume_id}`);
+      setAnalysisData(analysisResponse);
     } catch (error) {
       console.error("Error during resume analysis:", error);
       setStatusText("An error occurred. Please try again.");
     } finally {
       setIsProcessing(false);
-      setSelectedFile(null);
+      // setSelectedFile(null);
+      // setPdfPreviewUrl(""); // Clear preview when processing is done
     }
   };
 
@@ -239,63 +288,124 @@ const UploadResume = () => {
           )}
 
           {!isProcessing && (
-            <form
-              id="upload-form"
-              onSubmit={handleFormSubmit}
-              className="w-full max-w-2xl mt-8"
-            >
-              <div className="form-div">
-                <label htmlFor="company-name">Company name</label>
-                <input
-                  type="text"
-                  name="company-name"
-                  placeholder="e.g., Google, Microsoft"
-                  id="company-name"
-                  required
-                />
+            <div className="w-full max-w-7xl mt-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Form Section */}
+                <div className="w-full">
+                  <form
+                    id="upload-form"
+                    onSubmit={handleFormSubmit}
+                    className="w-full"
+                  >
+                    <div className="form-div">
+                      <label htmlFor="company-name">Company name</label>
+                      <input
+                        type="text"
+                        name="company-name"
+                        placeholder="e.g., Google, Microsoft"
+                        id="company-name"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-div">
+                      <label htmlFor="job-title">Job title</label>
+                      <input
+                        type="text"
+                        name="job-title"
+                        placeholder="e.g., Software Engineer"
+                        id="job-title"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-div mt-6">
+                      <label htmlFor="job-description">Job description</label>
+                      <textarea
+                        rows={4}
+                        name="job-description"
+                        placeholder="Paste the job description here..."
+                        id="job-description"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      className="primary-button mt-8 w-full"
+                      type="submit"
+                      disabled={!selectedFile}
+                    >
+                      <span className="flex items-center justify-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        Analyze Resume
+                      </span>
+                    </button>
+                  </form>
+                </div>
+
+                {/* PDF Upload/Preview Section */}
+                <div className="w-full">
+                  <div className="sticky top-8">
+                    {!selectedFile && !pdfPreviewUrl ? (
+                      // Upload Section
+                      <div>
+                        <div className="flex items-center gap-2 mb-4">
+                          <FileText className="h-5 w-5 text-gray-600" />
+                          <h3 className="text-lg font-medium text-gray-800">
+                            Upload Resume
+                          </h3>
+                        </div>
+                        <FileUploader
+                          selectedFile={selectedFile}
+                          setSelectedFile={setSelectedFile}
+                        />
+                      </div>
+                    ) : (
+                      // Preview Section
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <Eye className="h-5 w-5 text-gray-600" />
+                            <h3 className="text-lg font-medium text-gray-800">
+                              Resume Preview
+                            </h3>
+                          </div>
+                          <button
+                            onClick={handleRemovePdf}
+                            className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                          >
+                            <X className="h-4 w-4" />
+                            Remove
+                          </button>
+                        </div>
+                        <div className="border-2 border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                          <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                            <p className="text-sm text-gray-600 truncate">
+                              {selectedFile?.name}
+                            </p>
+                          </div>
+                          <div className="p-4">
+                            <iframe
+                              src={pdfPreviewUrl || undefined}
+                              className="w-full h-96 md:h-[500px] lg:h-[600px] border-0 rounded-lg"
+                              title="PDF Preview"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-
-              <div className="form-div">
-                <label htmlFor="job-title">Job title</label>
-                <input
-                  type="text"
-                  name="job-title"
-                  placeholder="e.g., Software Engineer"
-                  id="job-title"
-                  required
-                />
-              </div>
-
-              <div className="form-div mt-6">
-                <label htmlFor="job-description">Job description</label>
-                <textarea
-                  rows={4}
-                  name="job-description"
-                  placeholder="Paste the job description here..."
-                  id="job-description"
-                  required
-                />
-              </div>
-
-              <FileUploader
-                selectedFile={selectedFile}
-                setSelectedFile={setSelectedFile}
-              />
-
-              <button
-                className="primary-button mt-8"
-                type="submit"
-                disabled={!selectedFile}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Analyze Resume
-                </span>
-              </button>
-            </form>
+            </div>
           )}
         </div>
       </section>
+      {analysisData && (
+        <section ref={feedbackSectionRef} className="mt-6 border-t-2 py-5">
+          <ShowResumeAnalysis feedback={JSON.parse(analysisData)} />
+        </section>
+      )}
     </main>
   );
 };

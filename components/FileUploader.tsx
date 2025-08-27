@@ -56,7 +56,7 @@ const FileUploader = ({
       <label htmlFor="resume-upload">Upload Resume</label>
       <div
         {...getRootProps()}
-        className={`upload-area cursor-pointer transition-all duration-200 relative ${
+        className={`upload-area cursor-pointer transition-all duration-200 relative min-h-[200px] flex items-center justify-center ${
           isDragActive && !isDragReject
             ? "border-[#AB8C95] bg-gray-50 border-solid"
             : ""
@@ -80,12 +80,12 @@ const FileUploader = ({
           </button>
         )}
 
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 py-6 px-4">
           {selectedFile ? (
             <>
-              <CheckCircle className="h-12 w-12 text-green-500" />
+              <CheckCircle className="h-12 w-12 text-green-500 flex-shrink-0" />
               <div className="text-center">
-                <p className="font-medium text-green-700">
+                <p className="font-medium text-green-700 break-words">
                   {selectedFile.name}
                 </p>
                 <p className="text-sm text-green-600">
@@ -97,9 +97,9 @@ const FileUploader = ({
           ) : (
             <>
               {isDragReject ? (
-                <AlertCircle className="h-12 w-12 text-red-400" />
+                <AlertCircle className="h-12 w-12 text-red-400 flex-shrink-0" />
               ) : (
-                <Upload className="h-12 w-12 text-gray-400" />
+                <Upload className="h-12 w-12 text-gray-400 flex-shrink-0" />
               )}
               <div className="text-center">
                 {isDragActive ? (
@@ -142,4 +142,5 @@ const FileUploader = ({
     </div>
   );
 };
+
 export default FileUploader;
