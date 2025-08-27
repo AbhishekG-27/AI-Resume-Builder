@@ -159,7 +159,7 @@ const UploadResume = () => {
       const response = await UploadUserResume(selectedFile, user_id);
       await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
-      const { resume_id } = response;
+      const { resume_id, documentId } = response;
 
       // 2. Convert pdf to image
       setStatusText("Processing your resume...");
@@ -171,7 +171,7 @@ const UploadResume = () => {
       setStatusText("Uploading resume image...");
       const imageUploadResponse = await UploadResumeimage(
         imageFile.file,
-        user_id
+        documentId
       );
       if (!imageUploadResponse)
         return setStatusText("Failed to upload resume image.");
@@ -193,7 +193,7 @@ const UploadResume = () => {
 
       // 5. Upload the analysis results to the user
       const updateResponse = await UpdateResumeAnalysis(
-        user_id,
+        documentId,
         analysisResponse
       );
       if (!updateResponse) {

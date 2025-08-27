@@ -143,32 +143,40 @@ export const UploadUserResume = async (file: File, user_id: string) => {
     );
     const resume_id = uploadResult.$id;
 
-    // 2. Fetch the current user's document
+    // Create a document in analysis collection
+    const analysisDocument = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.analysisCollectionId,
+      ID.unique(),
+      {
+        resume_id: resume_id,
+      }
+    );
+
+    // Get the current analysis for the user
     const userDoc = await databases.getDocument(
       appwriteConfig.databaseId,
       appwriteConfig.usersCollectionId,
       user_id
     );
 
-    // 3. Update the array of resume IDs
-    // Get the existing array, or initialize a new one if it doesn't exist
-    const existingResumeIds = userDoc.resume_id || [];
-    const updatedResumeIds = [...existingResumeIds, resume_id];
-
-    // 4. Save the entire updated array back to the user's document
+    // Link the created analysis document to the user
     const updatedDocument = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.usersCollectionId,
       user_id,
       {
-        resume_id: updatedResumeIds, // Overwrite with the new, complete array
+        resume_analysis: [
+          ...(userDoc.resume_analysis || []),
+          analysisDocument.$id,
+        ],
       }
     );
 
     return {
       success: true,
       resume_id: resume_id,
-      document: updatedDocument,
+      documentId: analysisDocument.$id,
     };
   } catch (error) {
     console.error("Error in UploadUserResume:", error);
@@ -177,7 +185,7 @@ export const UploadUserResume = async (file: File, user_id: string) => {
   }
 };
 
-export const UploadResumeimage = async (file: File, user_id: string) => {
+export const UploadResumeimage = async (file: File, resume_id: string) => {
   const session = await createSessionClient();
   if (!session) return null;
 
@@ -191,32 +199,19 @@ export const UploadResumeimage = async (file: File, user_id: string) => {
     );
     const resume_img_id = uploadResult.$id;
 
-    // 2. Fetch the current user's document
-    const userDoc = await databases.getDocument(
+    // Create a document in analysis collection
+    const analysisDocument = await databases.updateDocument(
       appwriteConfig.databaseId,
-      appwriteConfig.usersCollectionId,
-      user_id
-    );
-
-    // 3. Update the array of resume image IDs
-    // Get the existing array, or initialize a new one if it doesn't exist
-    const existingResumeImgIds = userDoc.resume_img || [];
-    const updatedResumeImgIds = [...existingResumeImgIds, resume_img_id];
-
-    // 4. Save the entire updated array back to the user's document
-    const updatedDocument = await databases.updateDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.usersCollectionId,
-      user_id,
+      appwriteConfig.analysisCollectionId,
+      resume_id,
       {
-        resume_img: updatedResumeImgIds, // Overwrite with the new, complete array
+        resume_img: resume_img_id,
       }
     );
 
     return {
       success: true,
       resume_img_id: resume_img_id,
-      document: updatedDocument,
     };
   } catch (error) {
     console.error("Error in UploadResumeImage:", error);
@@ -264,48 +259,10 @@ export async function AnalyzePdfFromFile(
   return response.output_text;
 }
 
-export async function AnalyzePdfFromUrl(
-  resumeUrl: string,
-  jobTitle: string,
-  jobDescription: string
-) {
-  const openai = new OpenAI({
-    apiKey: process.env.NEXT_OPENAI_API_KEY,
-  });
-  try {
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: prepareInstructions({
-                jobTitle,
-                jobDescription,
-              }),
-            },
-            {
-              type: "input_file",
-              file_url: resumeUrl,
-            },
-          ],
-        },
-      ],
-    });
-
-    if (!response) {
-      return null;
-    }
-    return response.output_text;
-  } catch (error) {
-    console.error("Error in analyzePdfFromUrl:", error);
-    return null;
-  }
-}
-
-export const UpdateResumeAnalysis = async (user_id: string, analysis: string) => {
+export const UpdateResumeAnalysis = async (
+  document_id: string,
+  analysis: string
+) => {
   const session = await createSessionClient();
   if (!session) return null;
 
@@ -313,42 +270,49 @@ export const UpdateResumeAnalysis = async (user_id: string, analysis: string) =>
 
   try {
     // Create a document in analysis collection
-    const analysisDocument = await databases.createDocument(
+    const analysisDocument = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.analysisCollectionId,
-      ID.unique(),
+      document_id,
       {
         analysis_data: analysis,
       }
     );
 
-    // Get the current analysis for the user
-    const userDoc = await databases.getDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.usersCollectionId,
-      user_id
-    );
-
-    // Link the created analysis document to the user
-    const updatedDocument = await databases.updateDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.usersCollectionId,
-      user_id,
-      {
-        resume_analysis: [
-          ...(userDoc.resume_analysis || []),
-          analysisDocument.$id,
-        ],
-      }
-    );
-
     return {
       success: true,
-      document: updatedDocument,
     };
   } catch (error) {
     console.error("Error in UpdateResumeAnalysis:", error);
     // Return a more structured error
+    return null;
+  }
+};
+
+export const GetResumeDataById = async (resume_id: string) => {
+  const session = await createSessionClient();
+  if (!session) return null;
+
+  const { databases } = session;
+
+  try {
+    const resumeData = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.analysisCollectionId,
+      [Query.equal("resume_id", resume_id)]
+    );
+
+    if (resumeData.total === 0 || resumeData === null) {
+      return null;
+    }
+
+    const document = resumeData.documents[0];
+    return {
+      resume_img: document.resume_img,
+      analysis_data: JSON.parse(document.analysis_data),
+    };
+  } catch (error) {
+    console.error("Error in GetResumeDataById:", error);
     return null;
   }
 };
