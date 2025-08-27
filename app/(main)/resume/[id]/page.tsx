@@ -12,7 +12,6 @@ const Resume = () => {
     const result = await GetResumeDataById(id?.toString());
     if (!result) return;
     setAnalysisData(result.analysis_data);
-    console.log("Resume Data:", result.analysis_data);
   };
 
   useEffect(() => {
