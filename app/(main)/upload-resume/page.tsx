@@ -4,6 +4,8 @@ import { FileText, Eye, X } from "lucide-react";
 import FileUploader from "@/components/FileUploader";
 import {
   AnalyzePdfFromFile,
+  DeductUserAnalysis,
+  getCurrentSession,
   UpdateResumeAnalysis,
   UploadResumeimage,
   UploadUserResume,
@@ -183,8 +185,18 @@ const UploadResume = () => {
     setIsProcessing(true);
     setIsAnalysisComplete(false);
 
+    // Check if user is authenticated and has enough feedbacks left
+    const user = await getCurrentSession();
     if (!user) {
-      console.error("User not authenticated");
+      setStatusText("User not authenticated");
+      setIsProcessing(false);
+      return;
+    }
+
+    const { no_of_analysis_left } = user;
+    if (no_of_analysis_left <= 0) {
+      setStatusText("You have no analyses left. Please upgrade your plan.");
+      setIsProcessing(false);
       return;
     }
 
@@ -253,8 +265,17 @@ const UploadResume = () => {
         setStatusText("Failed to update resume analysis.");
         return;
       }
+
+      // Deduct one analysis from the user's account
+      const result = await DeductUserAnalysis(user_id);
+      if (!result) {
+        setStatusText("Failed to update analysis count.");
+        return;
+      }
+
       setIsAnalysisComplete(true);
       setAnalysisData(analysisResponse);
+      refreshUser();
     } catch (error) {
       console.error("Error during resume analysis:", error);
       setStatusText("An error occurred. Please try again.");

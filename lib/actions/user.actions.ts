@@ -315,3 +315,34 @@ export const GetResumeDataById = async (resume_id: string) => {
     return null;
   }
 };
+
+export const DeductUserAnalysis = async (user_id: string) => {
+  const session = await createSessionClient();
+  if (!session) return null;
+
+  const { databases } = session;
+
+  try {
+    const userDoc = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      user_id
+    );
+
+    if (userDoc.no_of_analysis_left > 0) {
+      const updatedDocument = await databases.updateDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.usersCollectionId,
+        user_id,
+        {
+          no_of_analysis_left: userDoc.no_of_analysis_left - 1,
+        }
+      );
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error in DeductUserAnalysis:", error);
+    return null;
+  }
+};
