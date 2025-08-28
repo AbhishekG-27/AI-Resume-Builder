@@ -26,6 +26,7 @@ const UploadResume = () => {
   const [isPdfjsLoading, setIsPdfjsLoading] = useState(false);
   const [analysisData, setAnalysisData] = useState<string>("");
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [isAnalysisComplete, setIsAnalysisComplete] = useState<boolean>(false);
   const feedbackSectionRef = useRef<HTMLDivElement>(null);
 
   // const router = useRouter();
@@ -180,6 +181,7 @@ const UploadResume = () => {
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsProcessing(true);
+    setIsAnalysisComplete(false);
 
     if (!user) {
       console.error("User not authenticated");
@@ -251,6 +253,7 @@ const UploadResume = () => {
         setStatusText("Failed to update resume analysis.");
         return;
       }
+      setIsAnalysisComplete(true);
       setAnalysisData(analysisResponse);
     } catch (error) {
       console.error("Error during resume analysis:", error);
@@ -289,62 +292,9 @@ const UploadResume = () => {
 
           {!isProcessing && (
             <div className="w-full max-w-7xl mt-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Form Section */}
-                <div className="w-full">
-                  <form
-                    id="upload-form"
-                    onSubmit={handleFormSubmit}
-                    className="w-full"
-                  >
-                    <div className="form-div">
-                      <label htmlFor="company-name">Company name</label>
-                      <input
-                        type="text"
-                        name="company-name"
-                        placeholder="e.g., Google, Microsoft"
-                        id="company-name"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-div">
-                      <label htmlFor="job-title">Job title</label>
-                      <input
-                        type="text"
-                        name="job-title"
-                        placeholder="e.g., Software Engineer"
-                        id="job-title"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-div mt-6">
-                      <label htmlFor="job-description">Job description</label>
-                      <textarea
-                        rows={4}
-                        name="job-description"
-                        placeholder="Paste the job description here..."
-                        id="job-description"
-                        required
-                      />
-                    </div>
-
-                    <button
-                      className="primary-button mt-8 w-full"
-                      type="submit"
-                      disabled={!selectedFile}
-                    >
-                      <span className="flex items-center justify-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        Analyze Resume
-                      </span>
-                    </button>
-                  </form>
-                </div>
-
+              <div className="grid grid-cols-1 lg:grid-cols-2 lg:row-start-1 gap-8">
                 {/* PDF Upload/Preview Section */}
-                <div className="w-full">
+                <div className="w-full lg:col-start-2">
                   <div className="sticky top-8">
                     {!selectedFile && !pdfPreviewUrl ? (
                       // Upload Section
@@ -396,13 +346,69 @@ const UploadResume = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Form Section */}
+                <div className="w-full lg:col-start-1 lg:row-start-1">
+                  <form
+                    id="upload-form"
+                    onSubmit={handleFormSubmit}
+                    className="w-full"
+                  >
+                    <div className="form-div">
+                      <label htmlFor="company-name">Company name</label>
+                      <input
+                        type="text"
+                        name="company-name"
+                        placeholder="e.g., Google, Microsoft"
+                        id="company-name"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-div">
+                      <label htmlFor="job-title">Job title</label>
+                      <input
+                        type="text"
+                        name="job-title"
+                        placeholder="e.g., Software Engineer"
+                        id="job-title"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-div mt-6">
+                      <label htmlFor="job-description">Job description</label>
+                      <textarea
+                        rows={12}
+                        name="job-description"
+                        placeholder="Paste the job description here..."
+                        id="job-description"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      className="primary-button mt-8 w-full"
+                      type="submit"
+                      disabled={!selectedFile}
+                    >
+                      <span className="flex items-center justify-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        Analyze Resume
+                      </span>
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           )}
         </div>
       </section>
-      {analysisData && (
-        <section ref={feedbackSectionRef} className="mt-6 border-t-2 py-5">
+      {isAnalysisComplete && (
+        <section
+          ref={feedbackSectionRef}
+          className="mt-6 border-t-2 py-5 w-[90%] mx-auto"
+        >
           <ShowResumeAnalysis feedback={JSON.parse(analysisData)} />
         </section>
       )}

@@ -3,9 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, X, FileText, Sparkles } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const { user } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -30,9 +33,7 @@ const Navbar = () => {
                 <FileText className="h-8 w-8 text-blue-600" />
                 <Sparkles className="h-4 w-4 text-yellow-500 absolute -top-1 -right-1" />
               </div>
-              <span className="text-xl font-bold text-gray-900">
-                AutoCv
-              </span>
+              <span className="text-xl font-bold text-gray-900">AutoCv</span>
             </Link>
           </div>
 
@@ -53,12 +54,16 @@ const Navbar = () => {
 
           {/* Desktop CTA Buttons */}
           <div className="hidden lg:flex items-center space-x-4">
-            <Link
-              href="/sign-in"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-            >
-              Sign In
-            </Link>
+            {user ? (
+              <div>Available Analysis: {user.no_of_analysis_left}</div>
+            ) : (
+              <Link
+                href="/sign-in"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Sign In
+              </Link>
+            )}
             <Link
               href="/upload-resume"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"

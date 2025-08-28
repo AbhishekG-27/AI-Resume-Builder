@@ -53,7 +53,6 @@ const FileUploader = ({
 
   return (
     <div className="form-div mt-3">
-      <label htmlFor="resume-upload">Upload Resume</label>
       <div
         {...getRootProps()}
         className={`upload-area cursor-pointer transition-all duration-200 relative min-h-[200px] flex items-center justify-center ${
@@ -123,7 +122,7 @@ const FileUploader = ({
                   </>
                 )}
                 <p className="text-xs text-gray-400 mt-2">
-                  Supports PDF, DOC, DOCX (Max 10MB)
+                  Supports PDF Only (Max 10MB)
                 </p>
               </div>
             </>

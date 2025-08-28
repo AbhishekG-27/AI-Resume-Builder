@@ -117,8 +117,7 @@ export const createAccount = async ({
         id: accountId,
         name: fullName,
         email: email,
-        resume_id: null,
-        resume_img: null,
+        no_of_analysis_left: 2,
       }
     );
     return parseStringify({

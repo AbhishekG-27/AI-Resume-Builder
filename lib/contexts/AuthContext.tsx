@@ -14,8 +14,12 @@ interface User {
   id: string;
   name: string;
   email: string;
-  resume_id: string[];
-  resume_img: string[];
+  resumes: {
+    analysis_data: string;
+    resume_id: string;
+    resume_img: string;
+  }[];
+  no_of_analysis_left: number;
   // Add other user properties from your database
 }
 
@@ -51,8 +55,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         id: user.$id,
         email: user.email,
         name: user.name,
-        resume_id: user.resume_id,
-        resume_img: user.resume_img,
+        resumes: user.resume_analysis,
+        no_of_analysis_left: user.no_of_analysis_left,
       });
     } catch (err) {
       console.log("No active session");
