@@ -341,6 +341,10 @@ export const DeductUserAnalysis = async (user_id: string) => {
     } else {
       return null;
     }
+    return {
+      success: true,
+      message: "User analysis count updated successfully.",
+    };
   } catch (error) {
     console.error("Error in DeductUserAnalysis:", error);
     return null;

@@ -200,12 +200,7 @@ const UploadResume = () => {
       return;
     }
 
-    const form = event.currentTarget.closest("form");
-    if (!form) {
-      return;
-    }
-
-    const formData = new FormData(form);
+    const formData = new FormData();
 
     if (!selectedFile) {
       setStatusText("Please upload your resume.");
@@ -220,7 +215,7 @@ const UploadResume = () => {
     try {
       // 1. Upload file to appwrite bucket
       setStatusText("Uploading your resume...");
-      const user_id = user.id;
+      const user_id = user.$id;
       const response = await UploadUserResume(selectedFile, user_id);
       await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
@@ -272,7 +267,6 @@ const UploadResume = () => {
         setStatusText("Failed to update analysis count.");
         return;
       }
-
       setIsAnalysisComplete(true);
       setAnalysisData(analysisResponse);
       refreshUser();

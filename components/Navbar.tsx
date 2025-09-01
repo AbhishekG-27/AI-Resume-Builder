@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Menu, X, FileText, Sparkles } from "lucide-react";
+import { Menu, X, FileText, Sparkles, User } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
 const Navbar = () => {
@@ -55,7 +55,17 @@ const Navbar = () => {
           {/* Desktop CTA Buttons */}
           <div className="hidden lg:flex items-center space-x-4">
             {user ? (
-              <div>Available Analysis: {user.no_of_analysis_left}</div>
+              <Link
+                href="/user-profile"
+                className="text-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                <div className="flex flex-col items-center gap-0.5">
+                  <User className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-900 hover:text-blue-600">
+                    {user.name.split(" ")[0] || user.email}
+                  </span>
+                </div>
+              </Link>
             ) : (
               <Link
                 href="/sign-in"
