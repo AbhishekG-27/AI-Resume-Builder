@@ -26,13 +26,13 @@ export default function Home() {
           </div>
         )}
         {/* User resumes */}
-        {user && user.resumes.length > 0 && (
+        {/* {user && user.resumes.length > 0 && (
           <div className="resumes-section">
             {user.resumes.map((resume) => (
               <ResumeCard key={resume.resume_id} resume={resume} />
             ))}
           </div>
-        )}
+        )} */}
       </section>
       <Pricing />
       <Footer />

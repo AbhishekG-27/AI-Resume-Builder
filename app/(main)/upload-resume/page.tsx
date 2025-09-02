@@ -32,7 +32,7 @@ const UploadResume = () => {
   const feedbackSectionRef = useRef<HTMLDivElement>(null);
 
   // const router = useRouter();
-  const { user, refreshUser } = useAuth();
+  const { refreshUser } = useAuth();
 
   // Auto-scroll when feedback data is set
   useEffect(() => {
@@ -87,7 +87,7 @@ const UploadResume = () => {
     } else {
       setPdfPreviewUrl(null);
     }
-  }, [selectedFile]);
+  }, [selectedFile, pdfPreviewUrl]);
 
   // Clean up URL on unmount
   useEffect(() => {
