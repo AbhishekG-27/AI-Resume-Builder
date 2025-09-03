@@ -3,10 +3,8 @@ import Footer from "@/components/Footer";
 import Pricing from "@/components/Pricing";
 import ResumeCard from "@/components/ResumeCard";
 import { resumes } from "@/constants";
-import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function Home() {
-  const { user, refreshUser } = useAuth();
 
   return (
     <div className="w-full">
@@ -18,21 +16,13 @@ export default function Home() {
           </h2>
         </div>
         {/* Template Resumes */}
-        {!user && resumes.length > 0 && (
+        {resumes.length > 0 && (
           <div className="resumes-section">
             {resumes.map((resume) => (
               <ResumeCard key={resume.id} resume={resume} />
             ))}
           </div>
         )}
-        {/* User resumes */}
-        {/* {user && user.resumes.length > 0 && (
-          <div className="resumes-section">
-            {user.resumes.map((resume) => (
-              <ResumeCard key={resume.resume_id} resume={resume} />
-            ))}
-          </div>
-        )} */}
       </section>
       <Pricing />
       <Footer />

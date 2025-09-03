@@ -7,6 +7,20 @@ interface Resume {
   feedback: Feedback;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  resumes: {
+    analysis_data: string;
+    resume_id: string;
+    resume_img: string;
+  }[];
+  no_of_analysis_left: number;
+  createdAt: string;
+  // Add other user properties from your database
+}
+
 interface Feedback {
   overallScore: number;
   ATS: {

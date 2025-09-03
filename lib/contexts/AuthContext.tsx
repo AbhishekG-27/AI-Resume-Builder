@@ -10,19 +10,6 @@ import {
 } from "react";
 import { getCurrentSession } from "@/lib/actions/user.actions";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  resumes: {
-    analysis_data: string;
-    resume_id: string;
-    resume_img: string;
-  }[];
-  no_of_analysis_left: number;
-  // Add other user properties from your database
-}
-
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -57,6 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         name: user.name,
         resumes: user.resume_analysis,
         no_of_analysis_left: user.no_of_analysis_left,
+        createdAt: user.$createdAt,
       });
     } catch (err) {
       console.log("No active session");

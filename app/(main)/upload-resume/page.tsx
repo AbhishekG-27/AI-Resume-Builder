@@ -216,7 +216,11 @@ const UploadResume = () => {
       // 1. Upload file to appwrite bucket
       setStatusText("Uploading your resume...");
       const user_id = user.$id;
-      const response = await UploadUserResume(selectedFile, user_id);
+      const response = await UploadUserResume(
+        selectedFile,
+        user_id,
+        companyName
+      );
       await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
       const { documentId } = response;

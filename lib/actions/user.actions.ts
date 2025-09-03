@@ -128,7 +128,11 @@ export const createAccount = async ({
   }
 };
 
-export const UploadUserResume = async (file: File, user_id: string) => {
+export const UploadUserResume = async (
+  file: File,
+  user_id: string,
+  company_name: string
+) => {
   const session = await createSessionClient();
   if (!session) return null;
 
@@ -149,6 +153,7 @@ export const UploadUserResume = async (file: File, user_id: string) => {
       ID.unique(),
       {
         resume_id: resume_id,
+        company_name: company_name,
       }
     );
 
