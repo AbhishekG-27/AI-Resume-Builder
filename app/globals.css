@@ -133,15 +133,15 @@ form {
   .animate-in {
     animation-fill-mode: both;
   }
-  
+
   .zoom-in-95 {
     animation: zoom-in-95 0.3s ease-out;
   }
-  
+
   .slide-in-from-left-5 {
     animation: slide-in-from-left-5 0.3s ease-out;
   }
-  
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -257,4 +257,18 @@ form {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom animations for the enhance button */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out;
 }

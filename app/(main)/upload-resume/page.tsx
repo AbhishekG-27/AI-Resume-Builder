@@ -12,6 +12,7 @@ import {
 } from "@/lib/actions/user.actions";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import ShowResumeAnalysis from "@/components/ShowResumeAnalysis";
+import Link from "next/link";
 // import { useRouter } from "next/navigation";
 
 interface PdfConversionResult {
@@ -30,6 +31,7 @@ const UploadResume = () => {
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [isAnalysisComplete, setIsAnalysisComplete] = useState<boolean>(false);
   const feedbackSectionRef = useRef<HTMLDivElement>(null);
+  const [uploadedResumeId, setUploadedResumeId] = useState<string | null>(null);
 
   // const router = useRouter();
   const { refreshUser } = useAuth();
@@ -87,7 +89,7 @@ const UploadResume = () => {
     } else {
       setPdfPreviewUrl(null);
     }
-  }, [selectedFile, pdfPreviewUrl]);
+  }, [selectedFile]);
 
   // Clean up URL on unmount
   useEffect(() => {
@@ -224,6 +226,7 @@ const UploadResume = () => {
       await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
       const { documentId } = response;
+      setUploadedResumeId(documentId);
 
       // 2. Convert pdf to image
       setStatusText("Processing your resume...");
@@ -426,9 +429,30 @@ const UploadResume = () => {
       {isAnalysisComplete && (
         <section
           ref={feedbackSectionRef}
-          className="mt-6 border-t-2 py-5 w-[90%] mx-auto"
+          className="mt-6 border-t-2 py-5 w-[90%] mx-auto flex flex-col items-center gap-6"
         >
           <ShowResumeAnalysis feedback={JSON.parse(analysisData)} />
+          <div className="relative my-4">
+            {/* Animated border */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-lg blur opacity-75 animate-pulse"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-lg animate-ping opacity-30"></div>
+
+            <Link
+              href={`/enhance-resume/${uploadedResumeId}`}
+              className="relative group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center gap-3 animate-bounce hover:animate-none"
+            >
+              <span className="relative z-10">🚀</span>
+              <span className="relative z-10">Enhance My Resume</span>
+              <span className="relative z-10 group-hover:translate-x-1 transition-transform duration-300">
+                ✨
+              </span>
+
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 -top-px overflow-hidden rounded-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              </div>
+            </Link>
+          </div>
         </section>
       )}
     </main>

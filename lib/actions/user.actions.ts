@@ -355,3 +355,17 @@ export const DeductUserAnalysis = async (user_id: string) => {
     return null;
   }
 };
+
+export const GetResumeById = async (resume_id: string) => {
+  const session = await createSessionClient();
+  if (!session) return null;
+
+  const { storage } = session;
+  try {
+    const resume = await storage.getFileView(appwriteConfig.bucketId, resume_id);
+    return resume;
+  } catch (error) {
+    console.error("Error in GetResumeById:", error);
+    return null;
+  }
+};
