@@ -362,10 +362,47 @@ export const GetResumeById = async (resume_id: string) => {
 
   const { storage } = session;
   try {
-    const resume = await storage.getFileView(appwriteConfig.bucketId, resume_id);
+    const resume = await storage.getFileView(
+      appwriteConfig.bucketId,
+      resume_id
+    );
     return resume;
   } catch (error) {
     console.error("Error in GetResumeById:", error);
     return null;
   }
+};
+
+export const ExtractResumeSections = async (resume: string) => {
+  const openai = new OpenAI({
+    apiKey: process.env.NEXT_OPENAI_API_KEY,
+  });
+
+  const response = await openai.responses.create({
+    model: "gpt-5",
+    input: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_file",
+            filename: "resume.pdf",
+            file_data: resume,
+          },
+          {
+            type: "input_text",
+            text: `Extract the main sections from the resume. Provide the section names only in a JSON array objects format. Example:
+              {"Summary": "Full Stack Developer with experience..."},
+              {"Experience": "Software Developer Intern..."}`,
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!response) {
+    return null;
+  }
+
+  return response.output_text;
 };

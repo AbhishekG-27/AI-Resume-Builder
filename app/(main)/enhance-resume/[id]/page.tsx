@@ -1,6 +1,9 @@
 "use client";
 import PDFViewer from "@/components/PdfViewer";
-import { GetResumeById } from "@/lib/actions/user.actions";
+import {
+  ExtractResumeSections,
+  GetResumeById,
+} from "@/lib/actions/user.actions";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -34,6 +37,20 @@ const ResumeEnhance = () => {
         const blob = new Blob([resumeData], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
         setResumeUrl(url);
+
+        // Make the API call to chatgpt for extracting the sections from the resume.
+        // Convert ArrayBuffer to Base64
+        const uint8Array = new Uint8Array(resumeData);
+        const binaryString = Array.from(uint8Array, (byte) =>
+          String.fromCharCode(byte)
+        ).join("");
+        const base64String = btoa(binaryString);
+        const sections = await ExtractResumeSections(base64String.toString());
+        if (!sections) {
+          setError("Failed to extract resume sections");
+          return;
+        }
+        console.log("Extracted resume sections:", sections);
       } catch (err) {
         console.error("Error fetching resume:", err);
         setError("Failed to load resume");
