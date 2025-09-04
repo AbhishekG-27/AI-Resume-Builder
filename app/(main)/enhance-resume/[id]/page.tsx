@@ -4,6 +4,7 @@ import {
   ExtractResumeSections,
   GetResumeById,
 } from "@/lib/actions/user.actions";
+import { createSingleColumnResumePDF } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -14,6 +15,7 @@ const ResumeEnhance = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [resumeSections, setResumeSections] = useState(null);
 
   useEffect(() => {
     const currentId = id?.toString() || "";
@@ -50,7 +52,20 @@ const ResumeEnhance = () => {
           setError("Failed to extract resume sections");
           return;
         }
-        console.log("Extracted resume sections:", sections);
+        const extractedSections: { key: string; value: string }[] =
+          await JSON.parse(sections);
+        const pdfbytes = await createSingleColumnResumePDF(extractedSections, [
+          "contact",
+          "summary",
+          "experience",
+          "education",
+          "skills",
+          "projects",
+        ]);
+        const enhancedBlob = new Blob([pdfbytes], { type: "application/pdf" });
+        const enhancedUrl = URL.createObjectURL(enhancedBlob);
+        setResumeUrl(enhancedUrl);
+        // setResumeSections(sections);
       } catch (err) {
         console.error("Error fetching resume:", err);
         setError("Failed to load resume");

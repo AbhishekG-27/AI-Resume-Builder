@@ -387,13 +387,17 @@ export const ExtractResumeSections = async (resume: string) => {
           {
             type: "input_file",
             filename: "resume.pdf",
-            file_data: resume,
+            file_data: `data:application/pdf;base64,${resume}`,
           },
           {
             type: "input_text",
-            text: `Extract the main sections from the resume. Provide the section names only in a JSON array objects format. Example:
-              {"Summary": "Full Stack Developer with experience..."},
-              {"Experience": "Software Developer Intern..."}`,
+            text: `Extract the sections from the resume like "Summary", "Experience", "Education",... and their corresponding content. Provide the section names only in a JSON array objects format and make sure to extract the content accurately and as much as possible. Example:
+              [
+                {key: "Summary", value: "Full Stack Developer with experience..."},
+                {key: "Experience", value: "Software Developer Intern..."},
+                {key: "Education", value: "B.Tech in Computer Science..."},
+                ......
+              ]`,
           },
         ],
       },
