@@ -1,5 +1,6 @@
 "use client";
 import PDFViewer from "@/components/PdfViewer";
+import ResumeReorder from "@/components/ResumeSectionEditor";
 import {
   ExtractResumeSections,
   GetResumeById,
@@ -15,7 +16,9 @@ const ResumeEnhance = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
-  const [resumeSections, setResumeSections] = useState(null);
+  const [resumeSections, setResumeSections] = useState<
+    { key: string; value: string }[]
+  >([]);
 
   useEffect(() => {
     const currentId = id?.toString() || "";
@@ -32,6 +35,7 @@ const ResumeEnhance = () => {
         const resumeData = await GetResumeById(currentId);
         if (!resumeData) {
           setError("Failed to fetch resume data");
+          console.error("No resume data returned from GetResumeById");
           return;
         }
 
@@ -54,17 +58,18 @@ const ResumeEnhance = () => {
         }
         const extractedSections: { key: string; value: string }[] =
           await JSON.parse(sections);
-        const pdfbytes = await createSingleColumnResumePDF(extractedSections, [
-          "contact",
-          "summary",
-          "experience",
-          "education",
-          "skills",
-          "projects",
-        ]);
-        const enhancedBlob = new Blob([pdfbytes], { type: "application/pdf" });
-        const enhancedUrl = URL.createObjectURL(enhancedBlob);
-        setResumeUrl(enhancedUrl);
+        setResumeSections(extractedSections);
+        // const pdfbytes = await createSingleColumnResumePDF(extractedSections, [
+        //   "contact",
+        //   "summary",
+        //   "experience",
+        //   "education",
+        //   "skills",
+        //   "projects",
+        // ]);
+        // const enhancedBlob = new Blob([pdfbytes], { type: "application/pdf" });
+        // const enhancedUrl = URL.createObjectURL(enhancedBlob);
+        // setResumeUrl(enhancedUrl);
         // setResumeSections(sections);
       } catch (err) {
         console.error("Error fetching resume:", err);
@@ -120,7 +125,9 @@ const ResumeEnhance = () => {
           </div>
         )}
 
-        {resumeUrl && !loading && !error && <PDFViewer pdfUrl={resumeUrl} />}
+        {resumeSections && !loading && !error && (
+          <ResumeReorder {...resumeSections} />
+        )}
       </div>
     </div>
   );
