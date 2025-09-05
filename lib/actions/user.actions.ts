@@ -391,7 +391,8 @@ export const ExtractResumeSections = async (resume: string) => {
           },
           {
             type: "input_text",
-            text: `Extract the sections from the resume like "Summary", "Experience", "Education",... and their corresponding content. Provide the section names only in a JSON array objects format and make sure to extract the content accurately and as much as possible. Example:
+            text: `Extract the sections from the resume like "Summary", "Experience", "Education",... and their corresponding content. Provide the section names only in a JSON array objects format and make sure to extract the content accurately and as much as possible.
+            Also remove any characters that cannot be encoded by WinAnsi, just the characters, not complete sections. Example:
               [
                 {key: "Summary", value: "Full Stack Developer with experience..."},
                 {key: "Experience", value: "Software Developer Intern..."},

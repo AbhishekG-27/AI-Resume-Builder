@@ -3,17 +3,19 @@ import PDFViewer from "@/components/PdfViewer";
 import ResumeReorder from "@/components/ResumeSectionEditor";
 import {
   ExtractResumeSections,
+  getCurrentSession,
   GetResumeById,
 } from "@/lib/actions/user.actions";
 import { createSingleColumnResumePDF } from "@/lib/utils";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const ResumeEnhance = () => {
   const params = useParams();
+  const router = useRouter();
   const id = params.id;
 
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [resumeSections, setResumeSections] = useState<
@@ -24,18 +26,27 @@ const ResumeEnhance = () => {
     const currentId = id?.toString() || "";
 
     const fetchResumeData = async () => {
+      // Check if user is signed in
+      const user = await getCurrentSession();
+      if (!user) {
+        setError("User not authenticated, redirecting to sign in...");
+        setIsLoading(false);
+        return setTimeout(() => {
+          router.push("/sign-in?redirect=/enhance-resume/" + currentId);
+        }, 2000);
+      }
+
       if (!currentId) {
         setError("No resume ID found");
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
 
       try {
-        setLoading(true);
+        setIsLoading(true);
         const resumeData = await GetResumeById(currentId);
         if (!resumeData) {
           setError("Failed to fetch resume data");
-          console.error("No resume data returned from GetResumeById");
           return;
         }
 
@@ -75,7 +86,7 @@ const ResumeEnhance = () => {
         console.error("Error fetching resume:", err);
         setError("Failed to load resume");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -94,7 +105,7 @@ const ResumeEnhance = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {loading && (
+        {isLoading && (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span className="ml-3 text-gray-600">Loading your resume...</span>
@@ -125,8 +136,8 @@ const ResumeEnhance = () => {
           </div>
         )}
 
-        {resumeSections && !loading && !error && (
-          <ResumeReorder {...resumeSections} />
+        {resumeSections && !isLoading && !isLoading && !error && (
+          <ResumeReorder resumeSections={resumeSections} />
         )}
       </div>
     </div>

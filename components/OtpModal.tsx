@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, X } from "lucide-react";
 
 import {
@@ -33,6 +33,8 @@ const OtpModal = ({
   email: string;
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/";
   const [isOpen, setIsOpen] = useState(true);
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +53,7 @@ const OtpModal = ({
       const sessionId = await verifySecret({ accountId, password });
       if (sessionId) {
         refreshUser();
-        router.push("/");
+        router.push(redirectUrl);
       }
     } catch (error) {
       console.error("Failed to verify OTP", error);

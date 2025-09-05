@@ -12,6 +12,8 @@ import OtpModal from "./OtpModal";
 import Image from "next/image";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { createSessionClient } from "@/lib/appwrite";
 
 type AuthTypes = "sign-in" | "sign-up";
 
@@ -31,8 +33,10 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
   const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState("");
 
-  const { refreshUser, user } = useAuth();
+  const { refreshUser } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/";
 
   const authFormSchema = formSchema(type);
 
@@ -55,9 +59,10 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
   const onSubmit = async (values: z.infer<typeof authFormSchema>) => {
     setIsLoading(true);
     try {
+      const user = await createSessionClient();
       if (user) {
         console.log("User already logged in");
-        return router.push("/");
+        return router.push(redirectUrl);
       }
 
       if (type === "sign-up") {
