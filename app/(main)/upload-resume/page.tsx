@@ -225,8 +225,8 @@ const UploadResume = () => {
       );
       await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
-      const { documentId } = response;
-      setUploadedResumeId(documentId);
+      const { documentId, resume_id } = response;
+      setUploadedResumeId(resume_id);
 
       // 2. Convert pdf to image
       setStatusText("Processing your resume...");
