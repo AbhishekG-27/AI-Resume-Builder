@@ -1,7 +1,7 @@
 "use client";
 import { CheckCircle, Upload, AlertCircle, X } from "lucide-react";
 import { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
+import { FileRejection, useDropzone } from "react-dropzone";
 
 const FileUploader = ({
   selectedFile,
@@ -13,7 +13,7 @@ const FileUploader = ({
   const [error, setError] = useState<string | null>(null);
 
   const onDrop = useCallback(
-    (acceptedFiles: File[], rejectedFiles: any[]) => {
+    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
       setError(null);
 
       if (rejectedFiles.length > 0) {

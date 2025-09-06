@@ -1,14 +1,14 @@
 "use client";
-import PDFViewer from "@/components/PdfViewer";
+// import PDFViewer from "@/components/PdfViewer";
 import ResumeReorder from "@/components/ResumeSectionEditor";
 import {
   ExtractResumeSections,
   getCurrentSession,
   GetResumeById,
 } from "@/lib/actions/user.actions";
-import { createSingleColumnResumePDF } from "@/lib/utils";
+// import { createSingleColumnResumePDF } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 const ResumeEnhance = () => {
   const params = useParams();
@@ -22,10 +22,8 @@ const ResumeEnhance = () => {
     { key: string; value: string }[]
   >([]);
 
-  useEffect(() => {
-    const currentId = id?.toString() || "";
-
-    const fetchResumeData = async () => {
+  const fetchResumeData = useCallback(
+    async (currentId: string) => {
       // Check if user is signed in
       const user = await getCurrentSession();
       if (!user) {
@@ -88,10 +86,15 @@ const ResumeEnhance = () => {
       } finally {
         setIsLoading(false);
       }
-    };
+    },
+    [router]
+  );
 
-    fetchResumeData();
-  }, [id]); // Remove resumeUrl dependency to avoid infinite loop
+  useEffect(() => {
+    const currentId = id?.toString() || "";
+
+    fetchResumeData(currentId);
+  }, [id, fetchResumeData]);
 
   // Cleanup URL on unmount
   useEffect(() => {

@@ -165,7 +165,7 @@ export const UploadUserResume = async (
     );
 
     // Link the created analysis document to the user
-    const updatedDocument = await databases.updateDocument(
+    await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.usersCollectionId,
       user_id,
@@ -204,7 +204,7 @@ export const UploadResumeimage = async (file: File, resume_id: string) => {
     const resume_img_id = uploadResult.$id;
 
     // Create a document in analysis collection
-    const analysisDocument = await databases.updateDocument(
+    await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.analysisCollectionId,
       resume_id,
@@ -274,7 +274,7 @@ export const UpdateResumeAnalysis = async (
 
   try {
     // Create a document in analysis collection
-    const analysisDocument = await databases.updateDocument(
+    await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.analysisCollectionId,
       document_id,
@@ -335,7 +335,7 @@ export const DeductUserAnalysis = async (user_id: string) => {
     );
 
     if (userDoc.no_of_analysis_left > 0) {
-      const updatedDocument = await databases.updateDocument(
+      await databases.updateDocument(
         appwriteConfig.databaseId,
         appwriteConfig.usersCollectionId,
         user_id,

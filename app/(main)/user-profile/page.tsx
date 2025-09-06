@@ -56,7 +56,7 @@ const UserProfile = () => {
     }
     setCurrentUser(user);
     setUserName(user?.name || "");
-  }, [user, loading]);
+  }, [user, loading, router]);
 
   // Use real resumes when available
   const currentResumes = userResumes;

@@ -14,7 +14,6 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
   //   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
@@ -47,44 +46,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         createdAt: user.$createdAt,
       });
     } catch (err) {
-      console.log("No active session");
+      console.log("No active session", err);
       setUser(null);
       setError(null); // Don't set error for no session
     } finally {
       setLoading(false);
     }
   };
-
-  // Login function
-  const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Your existing login logic here
-      // After successful login, refresh user data
-      await checkAuth();
-      return true;
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Logout function
-  //   const logout = async () => {
-  //     try {
-  //       await account.deleteSession("current");
-  //       setUser(null);
-  //       setError(null);
-  //     } catch (err) {
-  //       console.error("Logout error:", err);
-  //       // Still clear user state even if logout fails
-  //       setUser(null);
-  //     }
-  //   };
 
   // Refresh user data
   const refreshUser = async () => {
@@ -99,7 +67,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     loading,
     error,
-    login,
     // logout,
     refreshUser,
     isAuthenticated: !!user,

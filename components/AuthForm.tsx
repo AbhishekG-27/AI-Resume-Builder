@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -99,88 +99,91 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
       setIsLoading(false);
     }
   };
-
   return (
-    <div className="mx-auto w-full max-w-md bg-white p-8 rounded-2xl inset-shadow">
-      <h2 className="text-xl font-bold text-black">Welcome to AutoCv</h2>
-      <p className="mt-2 max-w-sm text-sm text-dark-200">
-        {type === "sign-in" ? "Sign in" : "Sign up"} to AutoCv
-      </p>
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className="mx-auto w-full max-w-md bg-white p-8 rounded-2xl inset-shadow">
+        <h2 className="text-xl font-bold text-black">Welcome to AutoCv</h2>
+        <p className="mt-2 max-w-sm text-sm text-dark-200">
+          {type === "sign-in" ? "Sign in" : "Sign up"} to AutoCv
+        </p>
 
-      <form className="my-8" onSubmit={form.handleSubmit(onSubmit)}>
-        {type === "sign-up" && (
-          <LabelInputContainer>
-            <Label htmlFor="fullName">Enter your name</Label>
+        <form className="my-8" onSubmit={form.handleSubmit(onSubmit)}>
+          {type === "sign-up" && (
+            <LabelInputContainer>
+              <Label htmlFor="fullName">Enter your name</Label>
+              {/* 2. Register the input */}
+              <Input
+                id="fullName"
+                placeholder="John Doe"
+                type="text"
+                className="w-full"
+                {...form.register("fullName")}
+              />
+              {/* 3. Display the error message */}
+              {errors.fullName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.fullName.message}
+                </p>
+              )}
+            </LabelInputContainer>
+          )}
+          <LabelInputContainer className="mb-4">
+            <Label htmlFor="email">Email Address</Label>
             {/* 2. Register the input */}
             <Input
-              id="fullName"
-              placeholder="John Doe"
-              type="text"
-              className="w-full"
-              {...form.register("fullName")}
+              id="email"
+              placeholder="john@example.com"
+              type="email"
+              {...form.register("email")}
             />
             {/* 3. Display the error message */}
-            {errors.fullName && (
+            {errors.email && (
               <p className="mt-1 text-sm text-red-500">
-                {errors.fullName.message}
+                {errors.email.message}
               </p>
             )}
           </LabelInputContainer>
-        )}
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="email">Email Address</Label>
-          {/* 2. Register the input */}
-          <Input
-            id="email"
-            placeholder="john@example.com"
-            type="email"
-            {...form.register("email")}
-          />
-          {/* 3. Display the error message */}
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-          )}
-        </LabelInputContainer>
 
-        <button
-          className={`relative block h-12 w-full rounded-2xl bg-gradient-to-r from-[#AB8C95] via-[#000000] to-[#8E97C5] font-medium text-white transition-all duration-200 hover:opacity-90 ${
-            isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-          }`}
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center space-x-2">
-              <Image
-                src="/assets/icons/loader.svg"
-                alt="loader"
-                width={20}
-                height={20}
-                className="animate-spin"
-              />
-            </div>
-          ) : (
-            <span>{type === "sign-up" ? "Sign up" : "Sign in"}</span>
-          )}
-        </button>
-
-        <div className="my-2 h-[1px] w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-        <div className="flex w-full items-center justify-center gap-1">
-          <p className="text-sm text-dark-200">
-            {type === "sign-up"
-              ? "Already have an account?"
-              : "Don't have an account?"}
-          </p>
-          <Link
-            className="text-sm font-medium text-black hover:underline"
-            href={type === "sign-up" ? "/sign-in" : "/sign-up"}
+          <button
+            className={`relative block h-12 w-full rounded-2xl bg-gradient-to-r from-[#AB8C95] via-[#000000] to-[#8E97C5] font-medium text-white transition-all duration-200 hover:opacity-90 ${
+              isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+            }`}
+            type="submit"
+            disabled={isLoading}
           >
-            {type === "sign-up" ? "Sign in" : "Sign up"}
-          </Link>
-        </div>
-      </form>
-      {userId && <OtpModal accountId={userId} email={email} />}
-    </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <Image
+                  src="/assets/icons/loader.svg"
+                  alt="loader"
+                  width={20}
+                  height={20}
+                  className="animate-spin"
+                />
+              </div>
+            ) : (
+              <span>{type === "sign-up" ? "Sign up" : "Sign in"}</span>
+            )}
+          </button>
+
+          <div className="my-2 h-[1px] w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+          <div className="flex w-full items-center justify-center gap-1">
+            <p className="text-sm text-dark-200">
+              {type === "sign-up"
+                ? "Already have an account?"
+                : "Don't have an account?"}
+            </p>
+            <Link
+              className="text-sm font-medium text-black hover:underline"
+              href={type === "sign-up" ? "/sign-in" : "/sign-up"}
+            >
+              {type === "sign-up" ? "Sign in" : "Sign up"}
+            </Link>
+          </div>
+        </form>
+        {userId && <OtpModal accountId={userId} email={email} />}
+      </div>
+    </Suspense>
   );
 }
 

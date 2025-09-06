@@ -13,6 +13,8 @@ import {
 import { useAuth } from "@/lib/contexts/AuthContext";
 import ShowResumeAnalysis from "@/components/ShowResumeAnalysis";
 import Link from "next/link";
+import Image from "next/image";
+// import type * as pdfjsLib from "pdfjs-dist";
 // import { useRouter } from "next/navigation";
 
 interface PdfConversionResult {
@@ -25,7 +27,9 @@ const UploadResume = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [pdfjsLib, setPdfjsLib] = useState<any>(null);
+  const [pdfjsLib, setPdfjsLib] = useState<typeof import("pdfjs-dist") | null>(
+    null
+  );
   const [isPdfjsLoading, setIsPdfjsLoading] = useState(false);
   const [analysisData, setAnalysisData] = useState<string>("");
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
@@ -79,13 +83,6 @@ const UploadResume = () => {
     if (selectedFile && selectedFile.type === "application/pdf") {
       const url = URL.createObjectURL(selectedFile);
       setPdfPreviewUrl(url);
-
-      // Clean up previous URL
-      return () => {
-        if (pdfPreviewUrl) {
-          URL.revokeObjectURL(pdfPreviewUrl);
-        }
-      };
     } else {
       setPdfPreviewUrl(null);
     }
@@ -145,7 +142,7 @@ const UploadResume = () => {
         context.imageSmoothingQuality = "high";
       }
 
-      await page.render({ canvasContext: context!, viewport }).promise;
+      await page.render({ canvasContext: context!, viewport, canvas }).promise;
 
       return new Promise((resolve) => {
         canvas.toBlob(
@@ -298,10 +295,13 @@ const UploadResume = () => {
                 <h2 className="text-2xl">{statusText}</h2>
               </div>
               <div className="w-full max-w-md">
-                <img
+                <Image
                   src="/images/resume-scan.gif"
                   alt="Resume scanning animation"
+                  width={500}
+                  height={300}
                   className="w-full h-auto rounded-2xl"
+                  unoptimized={true}
                 />
               </div>
               <div className="w-full max-w-md bg-gray-200 rounded-full h-2">

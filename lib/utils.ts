@@ -15,7 +15,7 @@ export async function createPdf() {
   const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
 
   const page = pdfDoc.addPage();
-  const { width, height } = page.getSize();
+  const { height } = page.getSize();
   const fontSize = 30;
   page.drawText("Creating PDFs in JavaScript is awesome!", {
     x: 50,
