@@ -14,6 +14,8 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { createSessionClient } from "@/lib/appwrite";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 type AuthTypes = "sign-in" | "sign-up";
 
@@ -32,6 +34,7 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const { refreshUser } = useAuth();
   const router = useRouter();
@@ -61,8 +64,11 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
     try {
       const user = await createSessionClient();
       if (user) {
-        console.log("User already logged in");
-        return router.push(redirectUrl);
+        setError("User already logged in");
+        setTimeout(() => {
+          setError(null);
+          router.push(redirectUrl);
+        }, 3000);
       }
 
       if (type === "sign-up") {
@@ -72,8 +78,11 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
           email: email || "",
         });
         if (user.redirect) {
-          // User already exists, handle redirection
-          console.error(user.message);
+          setError("User already exists. Please sign in.");
+          setTimeout(() => {
+            setError(null);
+            router.push("/sign-in");
+          }, 3000);
         } else {
           await refreshUser();
           setUserId(user.accountId);
@@ -88,13 +97,19 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
           setUserId(user.id);
           setEmail(email);
         } else {
-          // Handle case where user does not exist
-          console.error("User does not exist");
+          setError("User does not exist. Please sign up.");
+          setTimeout(() => {
+            setError(null);
+            router.push("/sign-up");
+          }, 3000);
         }
       }
     } catch (error) {
-      console.error("Error during form submission:", error);
       // Handle error appropriately, e.g., show a notification
+      setError("An unexpected error occurred. Please try again.");
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     } finally {
       setIsLoading(false);
     }
@@ -183,6 +198,13 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
         </form>
         {userId && <OtpModal accountId={userId} email={email} />}
       </div>
+      {error && (
+        <Alert variant="destructive" className="fixed bottom-4 right-4 w-md">
+          <Terminal />
+          <AlertTitle>Heads up!</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
     </Suspense>
   );
 }
