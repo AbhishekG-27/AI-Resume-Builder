@@ -1,9 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Check, Star } from "lucide-react";
 
 const Pricing = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      {
+        threshold: 0.2, // Trigger when 10% of the component is visible
+        rootMargin: '0px 0px -50px 0px' // Trigger slightly before it's fully in view
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
   const plans = [
     {
       name: "Free",
@@ -61,9 +88,11 @@ const Pricing = () => {
   ];
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-br from-gray-50 to-blue-50">
+    <section ref={sectionRef} className="py-16 px-4 bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
+        <div className={`text-center mb-12 transition-all duration-700 ${
+          isVisible ? 'animate-in slide-in-from-left-5' : 'opacity-0 translate-x-[-20px]'
+        }`}>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Choose Your Plan
           </h2>
@@ -74,12 +103,19 @@ const Pricing = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan) => (
+          {plans.map((plan, index) => (
             <div
               key={plan.name}
               className={`relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 ${
                 plan.popular ? "ring-2 ring-blue-500 scale-105" : ""
+              } ${
+                isVisible ? 'animate-in slide-in-from-left-5' : 'opacity-0 translate-x-[-20px]'
               }`}
+              style={{
+                animationDelay: isVisible ? `${index * 200}ms` : '0ms',
+                animationDuration: '600ms',
+                animationFillMode: 'both'
+              }}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -123,7 +159,9 @@ const Pricing = () => {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        <div className={`text-center mt-12 transition-all duration-700 ${
+          isVisible ? 'animate-in slide-in-from-left-5' : 'opacity-0 translate-x-[-20px]'
+        }`} style={{animationDelay: isVisible ? '800ms' : '0ms', animationFillMode: 'both'}}>
           <p className="text-gray-600 mb-4">
             All plans come with a 14-day money-back guarantee
           </p>
