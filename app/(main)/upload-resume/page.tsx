@@ -12,10 +12,7 @@ import {
 } from "@/lib/actions/user.actions";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import ShowResumeAnalysis from "@/components/ShowResumeAnalysis";
-import Link from "next/link";
 import Image from "next/image";
-// import type * as pdfjsLib from "pdfjs-dist";
-// import { useRouter } from "next/navigation";
 
 interface PdfConversionResult {
   imageUrl: string;
@@ -436,22 +433,6 @@ const UploadResume = () => {
             {/* Animated border */}
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-lg blur opacity-75 animate-pulse"></div>
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-lg animate-ping opacity-30"></div>
-
-            <Link
-              href={`/enhance-resume/${uploadedResumeId}`}
-              className="relative group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center gap-3 animate-bounce hover:animate-none"
-            >
-              <span className="relative z-10">🚀</span>
-              <span className="relative z-10">Enhance My Resume</span>
-              <span className="relative z-10 group-hover:translate-x-1 transition-transform duration-300">
-                ✨
-              </span>
-
-              {/* Shimmer effect */}
-              <div className="absolute inset-0 -top-px overflow-hidden rounded-lg">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-              </div>
-            </Link>
           </div>
         </section>
       )}
