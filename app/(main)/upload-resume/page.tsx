@@ -227,7 +227,6 @@ const UploadResume = () => {
         companyName,
         jobTitle
       );
-      await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
       const { documentId, resume_id } = response;
       setUploadedResumeId(resume_id);

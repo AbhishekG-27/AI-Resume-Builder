@@ -107,7 +107,7 @@ export const createAccount = async ({
     return parseStringify({ redirect: true, message: "User already exists" });
   } else {
     const accountId: string = ID.unique();
-    await sendEmailAuthenticationCode(accountId, email);
+    const sessionId = await sendEmailAuthenticationCode(accountId, email);
     const { databases } = await createAdminClient();
     await databases.createDocument(
       appwriteConfig.databaseId,

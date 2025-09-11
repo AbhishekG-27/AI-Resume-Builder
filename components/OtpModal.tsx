@@ -52,7 +52,7 @@ const OtpModal = ({
     try {
       const sessionId = await verifySecret({ accountId, password });
       if (sessionId) {
-        refreshUser();
+        await refreshUser();
         router.push(redirectUrl);
       }
     } catch (error) {
