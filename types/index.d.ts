@@ -1,10 +1,9 @@
 interface Resume {
-  id: string;
-  companyName?: string;
-  jobTitle?: string;
-  imagePath: string;
-  resumePath: string;
-  feedback: Feedback;
+  company_name?: string;
+  job_title?: string;
+  resume_img: string;
+  resume_id: string;
+  analysis_data: Feedback;
 }
 
 interface User {
@@ -12,9 +11,11 @@ interface User {
   name: string;
   email: string;
   resumes: {
-    analysis_data: string;
+    analysis_data: Feedback;
     resume_id: string;
     resume_img: string;
+    company_name: string;
+    job_title: string;
   }[];
   no_of_analysis_left: number;
   createdAt: string;

@@ -1,11 +1,10 @@
 export const resumes: Resume[] = [
   {
-    id: "1",
-    companyName: "Google",
-    jobTitle: "Frontend Developer",
-    imagePath: "/images/resume_01.png",
-    resumePath: "/resumes/resume-1.pdf",
-    feedback: {
+    resume_id: "1",
+    company_name: "Google",
+    job_title: "Frontend Developer",
+    resume_img: "/images/resume_01.png",
+    analysis_data: {
       overallScore: 85,
       ATS: {
         score: 90,
@@ -30,12 +29,11 @@ export const resumes: Resume[] = [
     },
   },
   {
-    id: "2",
-    companyName: "Microsoft",
-    jobTitle: "Cloud Engineer",
-    imagePath: "/images/resume_02.png",
-    resumePath: "/resumes/resume-2.pdf",
-    feedback: {
+    resume_id: "2",
+    company_name: "Microsoft",
+    job_title: "Cloud Engineer",
+    resume_img: "/images/resume_02.png",
+    analysis_data: {
       overallScore: 55,
       ATS: {
         score: 90,
@@ -60,12 +58,11 @@ export const resumes: Resume[] = [
     },
   },
   {
-    id: "3",
-    companyName: "Apple",
-    jobTitle: "iOS Developer",
-    imagePath: "/images/resume_03.png",
-    resumePath: "/resumes/resume-3.pdf",
-    feedback: {
+    resume_id: "3",
+    company_name: "Apple",
+    job_title: "iOS Developer",
+    resume_img: "/images/resume_03.png",
+    analysis_data: {
       overallScore: 75,
       ATS: {
         score: 90,
@@ -90,12 +87,11 @@ export const resumes: Resume[] = [
     },
   },
   {
-    id: "4",
-    companyName: "Google",
-    jobTitle: "Frontend Developer",
-    imagePath: "/images/resume_01.png",
-    resumePath: "/resumes/resume-1.pdf",
-    feedback: {
+    resume_id: "4",
+    company_name: "Google",
+    job_title: "Frontend Developer",
+    resume_img: "/images/resume_01.png",
+    analysis_data: {
       overallScore: 85,
       ATS: {
         score: 90,
@@ -120,12 +116,11 @@ export const resumes: Resume[] = [
     },
   },
   {
-    id: "5",
-    companyName: "Microsoft",
-    jobTitle: "Cloud Engineer",
-    imagePath: "/images/resume_02.png",
-    resumePath: "/resumes/resume-2.pdf",
-    feedback: {
+    resume_id: "5",
+    company_name: "Microsoft",
+    job_title: "Cloud Engineer",
+    resume_img: "/images/resume_02.png",
+    analysis_data: {
       overallScore: 55,
       ATS: {
         score: 90,
@@ -150,12 +145,11 @@ export const resumes: Resume[] = [
     },
   },
   {
-    id: "6",
-    companyName: "Apple",
-    jobTitle: "iOS Developer",
-    imagePath: "/images/resume_03.png",
-    resumePath: "/resumes/resume-3.pdf",
-    feedback: {
+    resume_id: "6",
+    company_name: "Apple",
+    job_title: "iOS Developer",
+    resume_img: "/images/resume_03.png",
+    analysis_data: {
       overallScore: 75,
       ATS: {
         score: 90,

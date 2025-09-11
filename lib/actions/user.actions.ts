@@ -131,7 +131,8 @@ export const createAccount = async ({
 export const UploadUserResume = async (
   file: File,
   user_id: string,
-  company_name: string
+  company_name: string,
+  job_title: string
 ) => {
   const session = await createSessionClient();
   if (!session) return null;
@@ -154,6 +155,7 @@ export const UploadUserResume = async (
       {
         resume_id: resume_id,
         company_name: company_name,
+        job_title: job_title,
       }
     );
 
@@ -312,7 +314,10 @@ export const GetResumeDataById = async (resume_id: string) => {
 
     const document = resumeData.documents[0];
     return {
+      resume_pdf: document.resume_id,
       resume_img: document.resume_img,
+      company_name: document.company_name,
+      job_title: document.job_title,
       analysis_data: JSON.parse(document.analysis_data),
     };
   } catch (error) {

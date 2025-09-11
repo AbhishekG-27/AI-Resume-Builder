@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ScoreCircle from "./ScoreCircle";
+import Link from "next/link";
 
 // Type definitions
 interface Resume {
@@ -29,50 +30,8 @@ interface Resume {
   companyName?: string;
   jobTitle?: string;
   imagePath: string;
+  pdfPath: string;
   feedback: Feedback;
-}
-
-interface Feedback {
-  overallScore: number;
-  ATS: {
-    score: number;
-    tips: {
-      type: "good" | "improve";
-      tip: string;
-    }[];
-  };
-  toneAndStyle: {
-    score: number;
-    tips: {
-      type: "good" | "improve";
-      tip: string;
-      explanation: string;
-    }[];
-  };
-  content: {
-    score: number;
-    tips: {
-      type: "good" | "improve";
-      tip: string;
-      explanation: string;
-    }[];
-  };
-  structure: {
-    score: number;
-    tips: {
-      type: "good" | "improve";
-      tip: string;
-      explanation: string;
-    }[];
-  };
-  skills: {
-    score: number;
-    tips: {
-      type: "good" | "improve";
-      tip: string;
-      explanation: string;
-    }[];
-  };
 }
 
 interface ShowResumeProps {
@@ -146,14 +105,16 @@ const AnimatedProgressCircle = ({
             className="transition-all duration-1000 ease-out"
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className={`p-2 rounded-full ${colors.bg} bg-opacity-20 mb-1`}>
-            <div className={`w-6 h-6 ${colors.text}`}>{icon}</div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+          <div className={`p-2 rounded-full ${colors.bg} bg-opacity-20`}>
+            <div className={`w-6 h-6 ${colors.text} flex items-center justify-center`}>{icon}</div>
           </div>
-          <span className={`text-2xl font-bold ${colors.text}`}>
-            {Math.round(animatedScore)}
-          </span>
-          <span className="text-xs text-gray-500">/ 100</span>
+          <div className="text-center">
+            <div className={`text-xl font-bold ${colors.text} leading-none`}>
+              {Math.round(animatedScore)}
+            </div>
+            <div className="text-[10px] text-gray-500 leading-none">/ 100</div>
+          </div>
         </div>
       </div>
       <p className="text-sm font-medium text-gray-700 mt-2 text-center">
@@ -373,7 +334,7 @@ export default function ShowResume({
 
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Resume Display */}
+          {/* Resume Display - Sticky */}
           <div
             className={`transition-all duration-700 delay-200 ${
               isVisible
@@ -381,21 +342,27 @@ export default function ShowResume({
                 : "-translate-x-8 opacity-0"
             }`}
           >
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="sticky top-6 bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="p-4 border-b border-gray-200 bg-gray-50">
                 <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                   <Eye className="h-5 w-5" />
                   Resume Preview
                 </h2>
               </div>
-              <div className="h-[600px] p-4 flex items-center justify-center">
-                <Image
-                  src={resume.imagePath}
-                  alt="Resume Preview"
-                  width={500}
-                  height={600}
-                  className="max-h-full max-w-full object-contain rounded-lg shadow-sm border border-gray-200"
-                />
+              <div className="p-4 flex items-center justify-center hover:scale-[1.01] transition-transform duration-300">
+                <Link
+                  href={resume.pdfPath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image
+                    src={resume.imagePath}
+                    alt="Resume Preview"
+                    width={500}
+                    height={600}
+                    className="max-h-full max-w-full object-contain rounded-lg shadow-sm border border-gray-200"
+                  />
+                </Link>
               </div>
             </div>
           </div>
@@ -458,37 +425,37 @@ export default function ShowResume({
               <div className="bg-white rounded-xl shadow-sm p-4 text-center">
                 <AnimatedProgressCircle
                   score={feedback.ATS.score}
-                  size={80}
+                  size={100}
                   strokeWidth={8}
                   label="ATS Score"
-                  icon={<Target className="h-4 w-4" />}
+                  icon={<Target className="h-5 w-5" />}
                 />
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 text-center">
                 <AnimatedProgressCircle
                   score={feedback.content.score}
-                  size={80}
+                  size={100}
                   strokeWidth={8}
                   label="Content"
-                  icon={<FileText className="h-4 w-4" />}
+                  icon={<FileText className="h-5 w-5" />}
                 />
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 text-center">
                 <AnimatedProgressCircle
                   score={feedback.toneAndStyle.score}
-                  size={80}
+                  size={100}
                   strokeWidth={8}
                   label="Tone & Style"
-                  icon={<MessageSquare className="h-4 w-4" />}
+                  icon={<MessageSquare className="h-5 w-5" />}
                 />
               </div>
               <div className="bg-white rounded-xl shadow-sm p-4 text-center">
                 <AnimatedProgressCircle
                   score={feedback.skills.score}
-                  size={80}
+                  size={100}
                   strokeWidth={8}
                   label="Skills"
-                  icon={<Code className="h-4 w-4" />}
+                  icon={<Code className="h-5 w-5" />}
                 />
               </div>
             </div>

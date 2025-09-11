@@ -6,40 +6,7 @@ import ResumeCard from "@/components/ResumeCard";
 import ScoreCircle from "@/components/ScoreCircle";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-
-// Dummy resume data based on existing structure
-const userResumes: Resume[] = [
-  {
-    id: "1",
-    companyName: "Google",
-    jobTitle: "Frontend Developer",
-    imagePath: "/images/resume_01.png",
-    resumePath: "/resumes/resume-1.pdf",
-    feedback: {
-      overallScore: 85,
-      ATS: { score: 90, tips: [] },
-      toneAndStyle: { score: 90, tips: [] },
-      content: { score: 90, tips: [] },
-      structure: { score: 90, tips: [] },
-      skills: { score: 90, tips: [] },
-    },
-  },
-  {
-    id: "2",
-    companyName: "Microsoft",
-    jobTitle: "Cloud Engineer",
-    imagePath: "/images/resume_02.png",
-    resumePath: "/resumes/resume-2.pdf",
-    feedback: {
-      overallScore: 75,
-      ATS: { score: 80, tips: [] },
-      toneAndStyle: { score: 85, tips: [] },
-      content: { score: 70, tips: [] },
-      structure: { score: 75, tips: [] },
-      skills: { score: 80, tips: [] },
-    },
-  },
-];
+import { GetResumeById } from "@/lib/actions/user.actions";
 
 const UserProfile = () => {
   const { user, loading } = useAuth();
@@ -49,6 +16,7 @@ const UserProfile = () => {
   const [userName, setUserName] = useState<string>("");
   const [tempName, setTempName] = useState<string>("");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userResumes, setUserResumes] = useState<Resume[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -56,10 +24,9 @@ const UserProfile = () => {
     }
     setCurrentUser(user);
     setUserName(user?.name || "");
+    setUserResumes(user?.resumes || []);
+    
   }, [user, loading, router]);
-
-  // Use real resumes when available
-  const currentResumes = userResumes;
 
   // Handle authentication loading and redirect
 
@@ -213,7 +180,7 @@ const UserProfile = () => {
                 </div>
                 <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
                   <div className="text-2xl font-bold text-blue-600">
-                    {currentResumes.length}
+                    {userResumes.length}
                   </div>
                   <div className="text-sm text-blue-700">Resumes</div>
                 </div>
@@ -356,12 +323,12 @@ const UserProfile = () => {
                 <ScoreCircle
                   score={
                     // Only calculate score for dummy resumes (which have feedback)
-                    currentResumes.length > 0 && "feedback" in currentResumes[0]
+                    userResumes.length > 0 && "feedback" in userResumes[0]
                       ? Math.round(
-                          (currentResumes as Resume[]).reduce(
-                            (acc, resume) => acc + resume.feedback.overallScore,
+                          (userResumes as Resume[]).reduce(
+                            (acc, resume) => acc + resume.analysis_data.overallScore,
                             0
-                          ) / currentResumes.length
+                          ) / userResumes.length
                         )
                       : 85 // Default score for real user data until we have feedback structure
                   }
@@ -424,14 +391,14 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {currentResumes.length > 0 ? (
+          {userResumes.length > 0 ? (
             <div className="resumes-section">
               {/* Show dummy resumes for now since real user resumes need different structure for ResumeCard */}
-              {("feedback" in currentResumes[0]
-                ? (currentResumes as Resume[])
+              {("feedback" in userResumes[0]
+                ? (userResumes as Resume[])
                 : userResumes
               ).map((resume) => (
-                <ResumeCard key={resume.id} resume={resume} />
+                <ResumeCard key={resume.resume_id} resume={resume} />
               ))}
             </div>
           ) : (

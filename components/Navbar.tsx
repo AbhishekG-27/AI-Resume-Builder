@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -54,7 +54,7 @@ const Navbar = () => {
 
           {/* Desktop CTA Buttons */}
           <div className="hidden lg:flex items-center space-x-4">
-            {user ? (
+            {user && !loading ? (
               <Link
                 href="/user-profile"
                 className="text-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
@@ -66,6 +66,10 @@ const Navbar = () => {
                   </span>
                 </div>
               </Link>
+            ) : loading ? (
+              <div className="flex items-center justify-center px-3 py-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+              </div>
             ) : (
               <Link
                 href="/sign-in"

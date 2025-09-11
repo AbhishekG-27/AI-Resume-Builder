@@ -32,6 +32,7 @@ const UploadResume = () => {
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [isAnalysisComplete, setIsAnalysisComplete] = useState<boolean>(false);
   const feedbackSectionRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const [uploadedResumeId, setUploadedResumeId] = useState<string | null>(null);
 
   // const router = useRouter();
@@ -196,7 +197,15 @@ const UploadResume = () => {
       return;
     }
 
-    const formData = new FormData();
+    // Get form data safely
+    const form = (event.target as HTMLFormElement) || (event.currentTarget as HTMLFormElement) || formRef.current;
+    if (!form) {
+      setStatusText("Form not found.");
+      setIsProcessing(false);
+      return;
+    }
+    
+    const formData = new FormData(form);
 
     if (!selectedFile) {
       setStatusText("Please upload your resume.");
@@ -215,7 +224,8 @@ const UploadResume = () => {
       const response = await UploadUserResume(
         selectedFile,
         user_id,
-        companyName
+        companyName,
+        jobTitle
       );
       await refreshUser();
       if (!response) return setStatusText("Failed to upload resume.");
@@ -369,6 +379,7 @@ const UploadResume = () => {
                 {/* Form Section */}
                 <div className="w-full lg:col-start-1 lg:row-start-1">
                   <form
+                    ref={formRef}
                     id="upload-form"
                     onSubmit={handleFormSubmit}
                     className="w-full"
