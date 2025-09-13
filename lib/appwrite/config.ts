@@ -6,4 +6,6 @@ export const appwriteConfig = {
   secretKey: process.env.NEXT_APPWRITE_SECRET_KEY!,
   bucketId: process.env.NEXT_APPWRITE_BUCKET_ID!,
   analysisCollectionId: process.env.NEXT_PUBLIC_APPWRITE_RESUME_ANALYSIS_ID!,
+  verificationCollectionId:
+    process.env.NEXT_PUBLIC_APPWRITE_VERIFICATION_COLLECTION_ID!,
 };

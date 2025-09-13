@@ -130,8 +130,39 @@ export const createAccount = async ({
       success: false,
     });
   } else {
+    // check if the user verification is already pending.
+    const { databases } = await createAdminClient();
+    const isVerified = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.verificationCollectionId,
+      [Query.equal("email", [email])]
+    );
+
+    // If a verification document already exists, return the accountId
+    if (isVerified.total > 0) {
+      const accountId = isVerified.documents[0].userId;
+      return parseStringify({
+        accountId: accountId,
+        redirect: false,
+        message:
+          "User verification is already pending. New verification code sent.",
+        success: true,
+      });
+    }
+
+    // If no verification document exists, create a new one
     const accountId: string = ID.unique();
     await sendEmailAuthenticationCode(accountId, email);
+    await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.verificationCollectionId,
+      ID.unique(),
+      {
+        email: email,
+        userId: accountId,
+        isVerified: false,
+      }
+    );
     return parseStringify({
       accountId,
       message: "OTP sent to email.",
