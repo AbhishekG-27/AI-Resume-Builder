@@ -42,25 +42,46 @@ const getUserByEmail = async (email: string) => {
 export const verifySecret = async ({
   accountId,
   password,
+  fullName,
+  email,
 }: {
   accountId: string;
   password: string;
+  fullName: string;
+  email: string;
 }) => {
   const { account } = await createAdminClient();
 
   try {
     // Create a session using the accountId and OTP code
     const session = await account.createSession(accountId, password);
+    if (!session) {
+      throw new Error("Incorrect verification code.");
+    }
+    // Set the session cookie
     (await cookies()).set("appwrite-session", session.secret, {
       path: "/",
       httpOnly: true,
       secure: true,
       sameSite: "strict",
     });
+
+    const { databases } = await createAdminClient();
+    await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      ID.unique(),
+      {
+        id: accountId,
+        name: fullName,
+        email: email,
+        no_of_analysis_left: 2,
+      }
+    );
     return parseStringify({ sessionId: session.$id });
   } catch (error) {
-    console.error("Error verifying OTP:", error);
-    throw new Error("Invalid verification code");
+    console.error(error);
+    return null;
   }
 };
 
@@ -96,7 +117,6 @@ export const getAccount = async (email: string) => {
 };
 
 export const createAccount = async ({
-  fullName,
   email,
 }: {
   fullName: string;
@@ -104,26 +124,19 @@ export const createAccount = async ({
 }) => {
   const isExistingUser = await getUserByEmail(email);
   if (isExistingUser) {
-    return parseStringify({ redirect: true, message: "User already exists" });
+    return parseStringify({
+      redirect: true,
+      message: "User already exists",
+      success: false,
+    });
   } else {
     const accountId: string = ID.unique();
-    const sessionId = await sendEmailAuthenticationCode(accountId, email);
-    const { databases } = await createAdminClient();
-    await databases.createDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.usersCollectionId,
-      ID.unique(),
-      {
-        id: accountId,
-        name: fullName,
-        email: email,
-        no_of_analysis_left: 2,
-      }
-    );
+    await sendEmailAuthenticationCode(accountId, email);
     return parseStringify({
       accountId,
-      message: "Account created successfully",
+      message: "OTP sent to email.",
       redirect: false,
+      success: true,
     });
   }
 };

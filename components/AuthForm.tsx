@@ -34,6 +34,7 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const { refreshUser } = useAuth();
@@ -80,13 +81,14 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
         if (user.redirect) {
           setError("User already exists. Please sign in.");
           setTimeout(() => {
-            setError(null);
             router.push("/sign-in");
+            setError(null);
           }, 3000);
         } else {
           await refreshUser();
           setUserId(user.accountId);
           setEmail(email);
+          setFullName(fullName || "");
         }
       } else if (type === "sign-in") {
         // Handle sign-in logic here
@@ -106,7 +108,7 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
       }
     } catch (error) {
       // Handle error appropriately, e.g., show a notification
-      setError("An unexpected error occurred. Please try again.");
+      setError("An unexpected error occurred: " + (error as Error).message);
       setTimeout(() => {
         setError(null);
       }, 3000);
@@ -196,7 +198,7 @@ export default function AuthForm({ type }: { type: AuthTypes }) {
             </Link>
           </div>
         </form>
-        {userId && <OtpModal accountId={userId} email={email} />}
+        {userId && <OtpModal accountId={userId} email={email} fullName={fullName} />}
       </div>
       {error && (
         <Alert variant="destructive" className="fixed bottom-4 right-4 w-md">

@@ -28,9 +28,11 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 const OtpModal = ({
   accountId,
   email,
+  fullName,
 }: {
   accountId: string;
   email: string;
+  fullName: string;
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,6 +40,7 @@ const OtpModal = ({
   const [isOpen, setIsOpen] = useState(true);
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>("");
 
   const { refreshUser } = useAuth();
 
@@ -50,13 +53,22 @@ const OtpModal = ({
     setIsLoading(true);
 
     try {
-      const sessionId = await verifySecret({ accountId, password });
-      if (sessionId) {
-        await refreshUser();
-        router.push(redirectUrl);
+      const sessionId = await verifySecret({
+        accountId,
+        password,
+        fullName,
+        email,
+      });
+      if (!sessionId) {
+        setError("Failed to verify OTP. Please try again.");
+        return;
       }
+      await refreshUser();
+      router.push(redirectUrl);
     } catch (error) {
       console.error("Failed to verify OTP", error);
+      setError("Failed to verify OTP. Please try again.");
+      return;
     } finally {
       setIsLoading(false);
     }
@@ -133,6 +145,12 @@ const OtpModal = ({
               </InputOTPGroup>
             </InputOTP>
           </div>
+
+          {error && (
+            <p className="mt-1 text-sm text-red-500 text-center w-full">
+              {error}
+            </p>
+          )}
 
           {/* Action Buttons */}
           <div className="w-full space-y-4">
