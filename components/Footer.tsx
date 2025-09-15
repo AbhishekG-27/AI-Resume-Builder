@@ -20,31 +20,31 @@ const Footer = () => {
     {
       title: "Product",
       links: [
-        { name: "Resume Builder", href: "/resume-builder" },
-        { name: "Templates", href: "/templates" },
-        { name: "Cover Letters", href: "/cover-letters" },
-        { name: "AI Assistant", href: "/ai-assistant" },
+        { name: "Resume Builder", href: "/" },
+        { name: "Templates", href: "/" },
+        { name: "Cover Letters", href: "/" },
+        { name: "AI Assistant", href: "/" },
         { name: "Pricing", href: "/pricing" },
       ],
     },
     {
       title: "Resources",
       links: [
-        { name: "Career Blog", href: "/blog" },
-        { name: "Resume Examples", href: "/examples" },
-        { name: "Interview Tips", href: "/interview-tips" },
-        { name: "Career Guides", href: "/guides" },
-        { name: "Help Center", href: "/help" },
+        { name: "Career Blog", href: "/" },
+        { name: "Resume Examples", href: "/" },
+        { name: "Interview Tips", href: "/" },
+        { name: "Career Guides", href: "/" },
+        { name: "Help Center", href: "/" },
       ],
     },
     {
       title: "Company",
       links: [
-        { name: "About Us", href: "/about" },
-        { name: "Careers", href: "/careers" },
-        { name: "Press", href: "/press" },
-        { name: "Partners", href: "/partners" },
-        { name: "Contact", href: "/contact" },
+        { name: "About Us", href: "/" },
+        { name: "Careers", href: "/" },
+        { name: "Press", href: "/" },
+        { name: "Partners", href: "/" },
+        { name: "Contact", href: "/" },
       ],
     },
   ];
@@ -175,13 +175,13 @@ const Footer = () => {
                 Terms of Service
               </a>
               <a
-                href="/cookies"
+                href="/"
                 className="text-gray-400 hover:text-blue-400 transition-colors"
               >
                 Cookie Policy
               </a>
               <a
-                href="/security"
+                href="/"
                 className="text-gray-400 hover:text-blue-400 transition-colors"
               >
                 Security

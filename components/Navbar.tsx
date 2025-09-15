@@ -16,10 +16,10 @@ const Navbar = () => {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/features", label: "Features" },
-    { href: "/templates", label: "Templates" },
+    { href: "/", label: "Features" },
+    { href: "/", label: "Templates" },
     { href: "/pricing", label: "Pricing" },
-    { href: "/about", label: "About" },
+    { href: "/", label: "About" },
   ];
 
   return (
@@ -42,7 +42,7 @@ const Navbar = () => {
             <div className="flex items-center space-x-6">
               {navLinks.map((link) => (
                 <Link
-                  key={link.href}
+                  key={link.label}
                   href={link.href}
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >

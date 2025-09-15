@@ -34,11 +34,11 @@ const Pricing = () => {
   const plans = [
     {
       name: "Free",
-      price: "$0",
+      price: "₹0",
       period: "forever",
       description: "Perfect for getting started",
       features: [
-        "Create 1 resume",
+        "Analyze 2 resumes per month",
         "Basic templates",
         "PDF export",
         "Email support",
@@ -46,15 +46,15 @@ const Pricing = () => {
       ],
       buttonText: "Get Started",
       popular: false,
-      buttonStyle: "bg-gray-200 text-gray-800 hover:bg-gray-300",
+      buttonStyle: "bg-gray-200 text-gray-800 hover:bg-gray-300 cursor-pointer",
     },
     {
       name: "Seeker",
-      price: "$9.99",
+      price: "₹100",
       period: "per month",
       description: "Best for active job seekers",
       features: [
-        "Unlimited resumes",
+        "Analyze 50 resumes per month",
         "Premium templates",
         "AI-powered suggestions",
         "Cover letter builder",
@@ -62,29 +62,10 @@ const Pricing = () => {
         "Advanced customization",
         "LinkedIn optimization",
       ],
-      buttonText: "Start Free Trial",
+      buttonText: "Get Seeker",
       popular: true,
-      buttonStyle: "bg-blue-600 text-white hover:bg-blue-700",
-    },
-    {
-      name: "Professional",
-      price: "$19.99",
-      period: "per month",
-      description: "For career professionals",
-      features: [
-        "Everything in Seeker",
-        "Portfolio builder",
-        "Personal branding kit",
-        "Interview preparation",
-        "Career coaching calls",
-        "White-label resumes",
-        "Analytics dashboard",
-        "Team collaboration",
-      ],
-      buttonText: "Go Professional",
-      popular: false,
-      buttonStyle: "bg-purple-600 text-white hover:bg-purple-700",
-    },
+      buttonStyle: "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer",
+    }
   ];
 
   return (
@@ -102,7 +83,7 @@ const Pricing = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <div
               key={plan.name}

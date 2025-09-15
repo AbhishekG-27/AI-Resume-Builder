@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { FileText, Eye, X } from "lucide-react";
+import { FileText, Eye, X, Terminal } from "lucide-react";
 import FileUploader from "@/components/FileUploader";
 import {
   AnalyzePdfFromFile,
@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/lib/contexts/AuthContext";
 import ShowResumeAnalysis from "@/components/ShowResumeAnalysis";
 import Image from "next/image";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface PdfConversionResult {
   imageUrl: string;
@@ -34,6 +35,7 @@ const UploadResume = () => {
   const feedbackSectionRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [uploadedResumeId, setUploadedResumeId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // const router = useRouter();
   const { refreshUser } = useAuth();
@@ -193,18 +195,23 @@ const UploadResume = () => {
     const { no_of_analysis_left } = user;
     if (no_of_analysis_left <= 0) {
       setStatusText("You have no analyses left. Please upgrade your plan.");
+      setError("You have no analyses left. Please upgrade your plan.");
+      setTimeout(() => setError(null), 5000);
       setIsProcessing(false);
       return;
     }
 
     // Get form data safely
-    const form = (event.target as HTMLFormElement) || (event.currentTarget as HTMLFormElement) || formRef.current;
+    const form =
+      (event.target as HTMLFormElement) ||
+      (event.currentTarget as HTMLFormElement) ||
+      formRef.current;
     if (!form) {
       setStatusText("Form not found.");
       setIsProcessing(false);
       return;
     }
-    
+
     const formData = new FormData(form);
 
     if (!selectedFile) {
@@ -432,6 +439,13 @@ const UploadResume = () => {
             </div>
           )}
         </div>
+        {error && (
+          <Alert variant="destructive" className="fixed border border-blue-600 bg-gray-200/60 bottom-4 right-4 w-md">
+            <Terminal />
+            <AlertTitle>Heads up!</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </section>
       {isAnalysisComplete && (
         <section
