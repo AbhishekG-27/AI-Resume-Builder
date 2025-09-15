@@ -14,6 +14,7 @@ import {
   Award,
   Zap,
 } from "lucide-react";
+import Link from "next/link";
 
 const Footer = () => {
   const footerSections = [
@@ -162,30 +163,30 @@ const Footer = () => {
               © 2024 AI Resume Builder. All rights reserved.
             </div>
             <div className="flex flex-wrap gap-6 text-sm">
-              <a
+              <Link
                 href="/privacy"
                 className="text-gray-400 hover:text-blue-400 transition-colors"
               >
                 Privacy Policy
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/terms"
                 className="text-gray-400 hover:text-blue-400 transition-colors"
               >
                 Terms of Service
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/"
                 className="text-gray-400 hover:text-blue-400 transition-colors"
               >
                 Cookie Policy
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/"
                 className="text-gray-400 hover:text-blue-400 transition-colors"
               >
                 Security
-              </a>
+              </Link>
             </div>
           </div>
         </div>

@@ -34,7 +34,7 @@ const UploadResume = () => {
   const [isAnalysisComplete, setIsAnalysisComplete] = useState<boolean>(false);
   const feedbackSectionRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const [uploadedResumeId, setUploadedResumeId] = useState<string | null>(null);
+  // const [uploadedResumeId, setUploadedResumeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // const router = useRouter();
@@ -236,7 +236,7 @@ const UploadResume = () => {
       );
       if (!response) return setStatusText("Failed to upload resume.");
       const { documentId, resume_id } = response;
-      setUploadedResumeId(resume_id);
+      // setUploadedResumeId(resume_id);
 
       // 2. Convert pdf to image
       setStatusText("Processing your resume...");
@@ -440,7 +440,10 @@ const UploadResume = () => {
           )}
         </div>
         {error && (
-          <Alert variant="destructive" className="fixed border border-blue-600 bg-gray-200/60 bottom-4 right-4 w-md">
+          <Alert
+            variant="destructive"
+            className="fixed border border-blue-600 bg-gray-200/60 bottom-4 right-4 w-md"
+          >
             <Terminal />
             <AlertTitle>Heads up!</AlertTitle>
             <AlertDescription>{error}</AlertDescription>

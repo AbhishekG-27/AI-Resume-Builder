@@ -6,7 +6,6 @@ import ResumeCard from "@/components/ResumeCard";
 import ScoreCircle from "@/components/ScoreCircle";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { GetResumeById } from "@/lib/actions/user.actions";
 
 const UserProfile = () => {
   const { user, loading } = useAuth();

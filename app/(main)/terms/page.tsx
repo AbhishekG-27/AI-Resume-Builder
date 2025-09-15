@@ -51,7 +51,7 @@ const Terms = () => {
                 </div>
                 <div className="prose prose-lg text-gray-700 space-y-4">
                   <p>
-                    By accessing and using AutoCv's resume building platform,
+                    By accessing and using AutoCv&apos;s resume building platform,
                     you accept and agree to be bound by the terms and provision
                     of this agreement. If you do not agree to abide by the
                     above, please do not use this service.
@@ -246,7 +246,7 @@ const Terms = () => {
                     resulting from your use of the service.
                   </p>
                   <p>
-                    We provide our service "as is" and "as available" without
+                    We provide our service &quot;as is&quot; and &quot;as available&quot; without
                     any warranties, express or implied.
                   </p>
                 </div>
