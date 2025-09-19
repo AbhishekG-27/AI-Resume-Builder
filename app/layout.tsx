@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AutoCv | Smart CV Builder",
   description: "Smart CV Builder for your dream job",
+  icons: {
+    icon: "/icon.png",
+  }
 };
 
 export default function RootLayout({
