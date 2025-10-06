@@ -64,7 +64,7 @@ NEXT_OPENAI_API_KEY=""
 
 ### 1. Clone the Repository
 ```
-git clone https://github.com/yourusername/autocv.git
+git clone https://github.com/AbhishekG-27/AI-Resume-Builder.git
 cd autocv
 ```
 
